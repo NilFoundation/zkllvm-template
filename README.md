@@ -19,7 +19,7 @@ On *nix systems, the following dependencies need to be present & can be installe
 # Installation 
 - Clone the repo 
  ```
-git clone https://github.com/hgedia/crypto3-scaffold.git
+git clone https://github.com/NilFoundation/crypto3-scaffold.git
 cd crypto3-scaffold
 ```
 
