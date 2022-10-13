@@ -1,7 +1,10 @@
 # Crypto3 Scaffolding
 
 This repository scaffolds the required dependencies for =nil;Foundation's [crypto3](https://github.com/NilFoundation/crypto3) library and presents
-an example of the [pubkey](https://github.com/NilFoundation/crypto3-pubkey/) module to sign & verify BLS signature.  
+an examples of modules:
+- [pubkey](https://github.com/NilFoundation/crypto3-pubkey/) 
+  - BLS signature
+  - BLS weighted threshold signatures  
 
 
 # Dependencies
@@ -36,7 +39,8 @@ cmake .. && make
 
 - Run executable
 ``` 
-./src/bls/crypto3-scaffold
+./src/bls/bls_sig
+./src/bls_weighted_threshold_sig/bls_weighted_threshold_sig
 ```
 
 # Common issues

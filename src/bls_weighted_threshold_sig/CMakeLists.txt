@@ -2,19 +2,20 @@ cmake_minimum_required(VERSION 3.5)
 
 # get header files; only needed by CMake generators,
 # expr.g., for creating proper Xcode projects
+
+set(C3_TARGET "bls_weighted_threshold_sig")
+
+
 set(${CMAKE_PROJECT_NAME}_HEADERS)
 
-set(C3_TARGET "bls_sig")
-
 # list cpp files excluding platform-dependent files
-list(APPEND ${CMAKE_PROJECT_NAME}_SOURCES src/main.cpp)
+list(APPEND ${CMAKE_PROJECT_NAME}_SOURCES src/threshold.cpp)
 
 find_package(Boost COMPONENTS random)
 
 add_executable(${C3_TARGET}
-               ${${CMAKE_PROJECT_NAME}_HEADERS}
-               ${${CMAKE_PROJECT_NAME}_SOURCES})
-
+        ${${CMAKE_PROJECT_NAME}_HEADERS}
+        ${${CMAKE_PROJECT_NAME}_SOURCES})
 
 set_target_properties(${C3_TARGET} PROPERTIES
                       LINKER_LANGUAGE CXX
