@@ -1,4 +1,4 @@
-# Crypto3 Scaffolding
+# Crypto3 Template
 
 This repository scaffolds the required dependencies for =nil;Foundation's [crypto3](https://github.com/NilFoundation/crypto3) library and presents
 an examples of modules:
