@@ -22,8 +22,8 @@ On *nix systems, the following dependencies need to be present & can be installe
 # Installation 
 - Clone the repo 
  ```
-git clone https://github.com/NilFoundation/crypto3-scaffold.git
-cd crypto3-scaffold
+git clone https://github.com/NilFoundation/crypto3-template.git
+cd crypto3-template
 ```
 
 - Clone all submodules recursively
