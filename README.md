@@ -1,11 +1,8 @@
-# Crypto3 Template
+# zkLLVM Template
 
-This repository scaffolds the required dependencies for =nil;Foundation's [crypto3](https://github.com/NilFoundation/crypto3) library and presents
-an examples of modules:
-- [pubkey](https://github.com/NilFoundation/crypto3-pubkey/) 
-  - BLS signature
-  - BLS weighted threshold signatures  
+This repository contains the template repository for the project using zkLLVM as a compiler. 
 
+The repository contains a template code to prove a BLS signature via zkLLVM using [Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3) as an SDK.
 
 # Dependencies
 
@@ -22,7 +19,7 @@ On *nix systems, the following dependencies need to be present & can be installe
 # Installation 
 - Clone the repo 
  ```
-git clone https://github.com/NilFoundation/crypto3-template.git
+git clone https://github.com/NilFoundation/zkllvm-template.git
 cd crypto3-template
 ```
 
