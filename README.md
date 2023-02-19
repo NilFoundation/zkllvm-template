@@ -17,10 +17,18 @@ On *nix systems, the following dependencies need to be present & can be installe
 ```
 
 # Installation 
+- Install the zkLLVM compiler
+```
+git clone --recurse-submodules https://github.com/nilfoundation/zkllvm.git
+cd zkllvm
+cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCIRCUIT_ASSEMBLY_OUTPUT=TRUE .
+make -C ${ZKLLVM_BUILD:-build} assigner clang -j$(nproc)
+```
+
 - Clone the repo 
  ```
 git clone https://github.com/NilFoundation/zkllvm-template.git
-cd crypto3-template
+cd zkllvm-template
 ```
 
 - Clone all submodules recursively
