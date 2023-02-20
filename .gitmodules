@@ -1,3 +1,6 @@
 [submodule "libs/crypto3"]
 	path = libs/crypto3
 	url = https://github.com/NilFoundation/crypto3.git
+[submodule "cmake/modules"]
+	path = cmake/modules
+	url = git@github.com:BoostCMake/cmake_modules.git
