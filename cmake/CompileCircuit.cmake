@@ -24,14 +24,23 @@ function(add_circuit name)
     endif()
 
     foreach(source ${ARG_SOURCES})
-        if(NOT EXISTS ${source})
+        if(NOT IS_ABSOLUTE ${include_dir})
+            list(APPEND CIRCUIT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/${source}")
+        else()
+            list(APPEND CIRCUIT_SOURCES "${source}")
+        endif()
+    endforeach()
+    list(REMOVE_DUPLICATES CIRCUIT_SOURCES)
+
+    foreach(ITR ${CIRCUIT_SOURCES})
+        if(NOT EXISTS ${ITR})
             message(SEND_ERROR "Cannot find circuit source file: ${source}")
         endif()
     endforeach()
 
     set(INCLUDE_DIRS_LIST "")
     # Collect include directories from dependencies first
-    foreach(lib ${CIRCUIT_DEPENDENCIES})
+    foreach(lib ${ARG_LINK_LIBRARIES})
         get_target_property(lib_include_dirs ${lib} INTERFACE_INCLUDE_DIRECTORIES)
         foreach(dir ${lib_include_dirs})
             list(APPEND INCLUDE_DIRS_LIST "-I${dir}")
@@ -54,12 +63,13 @@ function(add_circuit name)
         set(format_option -c)
     endif()
 
-    add_custom_target(${name} COMMAND_EXPAND_LISTS VERBATIM
-
+    add_custom_target(${name}
                       COMMAND ${CMAKE_CXX_COMPILER} -D__ZKLLVM__ ${INCLUDE_DIRS_LIST} -emit-llvm -O1
-                      ${format_option} -o ${binary_name}
+                      ${format_option} -o ${binary_name} ${CIRCUIT_SOURCES}
 
-                      SOURCES ${ARG_SOURCES})
+                      VERBATIM COMMAND_EXPAND_LISTS
+
+                      SOURCES ${CIRCUIT_SOURCES})
     set_target_properties(${name} PROPERTIES
                           OUTPUT_NAME ${binary_name})
 endfunction(add_circuit)
