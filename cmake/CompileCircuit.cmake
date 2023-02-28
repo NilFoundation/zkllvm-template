@@ -53,6 +53,7 @@ function(add_circuit name)
         endif()
         list(APPEND INCLUDE_DIRS_LIST "-I${include_dir}")
     endforeach()
+    list(APPEND INCLUDE_DIRS_LIST -I${CMAKE_SOURCE_DIR}/libs/stdlib/libcpp -I${CMAKE_SOURCE_DIR}/libs/stdlib/libc/include)
     list(REMOVE_DUPLICATES INCLUDE_DIRS_LIST)
 
     if(CIRCUIT_ASSEMBLY_OUTPUT)
@@ -64,14 +65,10 @@ function(add_circuit name)
     endif()
 
     add_custom_target(${name}
-                      COMMAND ${CMAKE_CXX_COMPILER} -target assigner -Xclang -no-opaque-pointers -D__ZKLLVM__ ${INCLUDE_DIRS_LIST} -emit-llvm -O1
-                      ${format_option} ${ARG_CLANG_OPTIONS} -o ${binary_name} ${CIRCUIT_SOURCES}
+                      COMMAND ${CMAKE_CXX_COMPILER} -target assigner -Xclang -no-opaque-pointers -D__ZKLLVM__ ${INCLUDE_DIRS_LIST} -emit-llvm -O1 ${format_option} -o ${binary_name} ${CIRCUIT_SOURCES}
 
                       VERBATIM COMMAND_EXPAND_LISTS
 
                       SOURCES ${CIRCUIT_SOURCES})
-    set_target_properties(${name} PROPERTIES
-                          CXX_STANDARD 20
-                          CXX_STANDARD_REQUIRED TRUE
-                          OUTPUT_NAME ${binary_name})
+    set_target_properties(${name} PROPERTIES OUTPUT_NAME ${binary_name})
 endfunction(add_circuit)
