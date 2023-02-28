@@ -9,7 +9,8 @@ The repository contains template code to prove a BLS signature via zkLLVM using
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Step 1. Get zkLLVM](#step-1-get-zkllvm)
-  - [Build from source](#build-from-source)
+  - [Install zkLLVM from a .deb package](#install-zkllvm-from-a-deb-package)
+  - [Build zkLLVM from source](#build-zkllvm-from-source)
 - [Step 2. Build the project](#step-2-build-the-project)
 - [Common build issues](#common-build-issues)
   - [Compilation Errors](#compilation-errors)
@@ -18,6 +19,32 @@ The repository contains template code to prove a BLS signature via zkLLVM using
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Step 1. Get zkLLVM
+
+## Install zkLLVM from a .deb package
+
+On Debian-like systems with AMD64 architecture you can install zkLLVM from a package.
+
+1.  [Download the latest release](https://github.com/NilFoundation/zkllvm/releases/) from GitHub.
+
+    ```
+    wget https://github.com/NilFoundation/zkllvm/releases/download/v0.0.44/zkllvm-16.0.0-Linux.deb
+    ```
+
+2.  Install the package
+    
+    ```
+    dpkg -i zkllvm-16.0.0-Linux.deb
+    ```
+    
+    When installed from a package, zkLLVM will replace the system-default clang.
+
+    ```console
+    $ clang --version
+    clang version 16.0.0 (git@github.com:NilFoundation/zkllvm-circifier.git 4d230ed398898e2328862fbde0e76a377d7d8884)
+    Target: x86_64-unknown-linux-gnu
+    Thread model: posix
+    InstalledDir: /usr/bin
+    ```
 
 ## Build zkLLVM from source
 
