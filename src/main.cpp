@@ -14,8 +14,8 @@ pow(typename pallas::base_field_type::value_type a, int n) {
 }
 
 [[circuit]] typename pallas::base_field_type::value_type
-example(typename pallas::base_field_type::value_type a,
-        typename pallas::base_field_type::value_type b) {
+field_arithmetic_example(typename pallas::base_field_type::value_type a,
+                         typename pallas::base_field_type::value_type b) {
 
   typename pallas::base_field_type::value_type c =
       (a + b) * a + b * (a + b) * (a + b);
