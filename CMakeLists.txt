@@ -7,7 +7,7 @@ include(CMConfig)
 include(CMSetupVersion)
 include(CompileCircuit)
 
-cm_workspace(zkllvm)
+cm_workspace(crypto3)
 
 macro(cm_find_package NAME)
     if(NOT "${NAME}" MATCHES "^${CMAKE_WORKSPACE_NAME}_.*$" AND NOT "${NAME}" STREQUAL CM)
