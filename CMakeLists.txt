@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
-     "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/share/modules/cmake")
+     "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/share/modules/cmake"
+     "/usr/share/zkllvm")
 
 include(CMConfig)
 include(CMSetupVersion)
-include(CompileCircuit)
+include(CircuitCompile)
 
 cm_workspace(crypto3)
 
