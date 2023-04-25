@@ -1,42 +1,74 @@
 # zkLLVM Template
 
-This repository contains the template repository for the project using zkLLVM as a compiler. 
+Tutorial and a template repository for a zk-enabled application project
+based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
 
-The repository contains a template code to prove a BLS signature via zkLLVM using [Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3) as an SDK.
+Use it to learn about developing zk-enabled apps with zkLLVM step-by-step.
 
-# Dependencies
+Code in `./src` is an example of BLS12-381 signature verification via zkLLVM using
+[Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3) as an SDK.
 
-- [Boost](https://www.boost.org/) == 1.76.0
-- [cmake](https://cmake.org/) >= 3.5
-- [clang](https://clang.llvm.org/) >= 13.0.0
+# Preparing environment with zkLLVM
 
-On *nix systems, the following dependencies need to be present & can be installed using the following command
+## 1. Clone the template repository and submodules
+
+First, clone this repository with all its submodules:
 
 ```
- sudo apt install build-essential libssl-dev cmake clang git
-```
-
-# Installation
-
-## zkLLVM
-- Downloading the latest release of [zkLLVM](https://github.com/NilFoundation/zkllvm/releases/) compiler
-```
-wget https://github.com/NilFoundation/zkllvm/releases/tag/<version>
-```
-
-- Install the package
-```
-dpkg -i <zkllvm-version>.deb
-```
-
-
-- Clone the zkLLVM template repository 
- ```
-git clone --recurse-submodules https://github.com/NilFoundation/zkllvm-template.git
+git clone --recurse-submodules git@github.com:NilFoundation/zkllvm-template.git
 cd zkllvm-template
 ```
 
-# Step 1 : Build the IR file
+## 2. Run a Docker container
+
+For tutorial purposes, we will do everything in Docker.
+
+First, run a new container named `zkllvm`
+and mount this project's directory in it:
+
+```console
+$ docker run --name zkllvm \
+  --platform=linux/amd64 -it \
+  -v $(pwd):/opt/zkllvm-template \
+  ubuntu:latest
+  
+# cd /opt/zkllvm-template
+```
+
+## 3. Install zkLLVM and dependencies
+
+zkLLVM is distributed as a deb package, but we need to setup the repository first:
+
+```
+echo 'deb [trusted=yes]  http://deb.nil.foundation/ubuntu/ all main' >>/etc/apt/sources.list
+apt update
+apt install -y zkllvm cmake libboost-all-dev
+```
+
+Note that zkLLVM replaces original clang, being a fully compatible drop-in replacement:
+```
+# clang --version
+clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+```
+
+## 4. Stop and restart container when needed
+
+This new Docker container persists when you exit it.
+Restart it when you need it again,
+and you won't need to reinstall zkLLVM and other dependencies every time.
+
+```console
+$ docker container start -i zkllvm
+ 
+root@9ef17682eaca:/# cd /opt/zkllvm-template
+```
+
+# Zero-knowledge proof workflow
+
+# Step 1 : Build the intermediate representation (IR) file
 ``` 
 mkdir build && cd build
 cmake .. && make zkllvm_zkllvm
