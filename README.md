@@ -71,7 +71,7 @@ root@9ef17682eaca:/# cd /opt/zkllvm-template
 # Step 1 : Build the intermediate representation (IR) file
 ``` 
 mkdir build && cd build
-cmake .. && make zkllvm_zkllvm
+cmake .. && make template
 ```
 You should have a circuit IR file called `zkllvm_zkllvm.ll` 
 
