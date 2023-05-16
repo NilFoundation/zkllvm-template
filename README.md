@@ -73,7 +73,7 @@ root@9ef17682eaca:/# cd /opt/zkllvm-template
 mkdir build && cd build
 cmake .. && make template
 ```
-You should have a circuit IR file called `zkllvm_zkllvm.ll` 
+You should have a circuit IR file called `template.ll` 
 
 # Step 2: Setup proof market user/toolchain
 Please navigate out of the `zkllvm-template` repository
