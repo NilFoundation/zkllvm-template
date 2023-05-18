@@ -14,56 +14,50 @@ Code in `./src` is an example of BLS12-381 signature verification via zkLLVM usi
 
 First, clone this repository with all its submodules:
 
-```
+```bash
 git clone --recurse-submodules git@github.com:NilFoundation/zkllvm-template.git
 cd zkllvm-template
 ```
 
-## 2. Run a Docker container
+If you cloned without `--recurse-submodules`, make sure you initialize submodules:
 
-For tutorial purposes, we will do everything in Docker.
+```bash
+git submodule update --init --recursive
+```
 
-First, run a new container named `zkllvm`
+## 2. Build a Docker image with zkLLVM environment
+
+Build a Docker image with zkLLVM and other packages required for building this project:
+
+```bash
+docker build . -t zkllvm-template:latest
+```
+
+We're using Docker to avoid installing packages on the host machine,
+and because it allows us to have the same environment on any system.
+
+## 3. Run a Docker container from this image
+
+Now, run a new Docker container
 and mount this project's directory in it:
 
-```console
-$ docker run --name zkllvm \
-  --platform=linux/amd64 -it \
+```bash
+docker run -it --rm \
+  --platform=linux/amd64 \
   -v $(pwd):/opt/zkllvm-template \
-  ubuntu:latest
-  
-# cd /opt/zkllvm-template
+  zkllvm-template:latest
+
+cd /opt/zkllvm-template
 ```
 
-## 3. Install zkLLVM and dependencies
-
-zkLLVM is distributed as a deb package, but we need to setup the repository first:
-
-```
-echo 'deb [trusted=yes]  http://deb.nil.foundation/ubuntu/ all main' >>/etc/apt/sources.list
-apt update
-apt install -y zkllvm cmake libboost-all-dev
-```
-
-Note that zkLLVM replaces original clang, being a fully compatible drop-in replacement:
+Let's check that we have the zkLLVM compiler available.
+Note that it replaces original clang, being a fully compatible drop-in replacement:
 ```
 # clang --version
 clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
 Target: x86_64-unknown-linux-gnu
 Thread model: posix
 InstalledDir: /usr/bin
-```
-
-## 4. Stop and restart container when needed
-
-This new Docker container persists when you exit it.
-Restart it when you need it again,
-and you won't need to reinstall zkLLVM and other dependencies every time.
-
-```console
-$ docker container start -i zkllvm
- 
-root@9ef17682eaca:/# cd /opt/zkllvm-template
 ```
 
 # Zero-knowledge proof workflow
@@ -76,7 +70,7 @@ cmake .. && make template
 You should have a circuit IR file called `template.ll` 
 
 # Step 2: Setup proof market user/toolchain
-Please navigate out of the `zkllvm-template` repository
+Please navigate out of the `zkllvm-tfemplate` repository
 
 Clone the proof-market-toolchain repository
 
