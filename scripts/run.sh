@@ -45,6 +45,7 @@ check_file_exists() {
 }
 
 # Compile source code into a circuit
+# https://github.com/NilFoundation/zkllvm-template/#step-1-compile-a-circuit
 compile() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
@@ -98,6 +99,7 @@ run_assigner() {
 # Use the Proof Market toolchain to pack circuit into a statement
 # that can later be used to produce a proof locally or sent to the
 # Proof Market.
+# https://github.com/NilFoundation/zkllvm-template/#step-2-build-a-circuit-statement
 build_statement() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
@@ -127,6 +129,7 @@ build_statement() {
 # See the input files at:
 # ./src/main.inp
 # ./src/main-input.json
+# https://github.com/NilFoundation/zkllvm-template/#step-3-produce-and-verify-a-proof-locally
 prove() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
