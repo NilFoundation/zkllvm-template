@@ -2,8 +2,9 @@
 
 Tutorial and a template repository for a zk-enabled application project
 based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
-
 Use it to learn about developing zk-enabled apps with zkLLVM step-by-step.
+
+For this tutorial you will need an amd64 machine with Docker (on Linux) or Docker Desktop (on macOS).
 
 Code in `./src` is an example of BLS12-381 signature verification via zkLLVM using
 [Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3) as an SDK.
@@ -27,7 +28,7 @@ git submodule update --init --recursive
 
 ## 2. Build a Docker image with zkLLVM environment
 
-Build a Docker image with zkLLVM and other packages required for building this project:
+Build a Docker image with zkLLVM and other project dependencies:
 
 ```bash
 docker build . -t zkllvm-template:latest
@@ -53,21 +54,63 @@ cd /opt/zkllvm-template
 Let's check that we have the zkLLVM compiler available.
 Note that it replaces original clang, being a fully compatible drop-in replacement:
 ```
-# clang --version
-clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
-Target: x86_64-unknown-linux-gnu
-Thread model: posix
-InstalledDir: /usr/bin
+clang --version
+# clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
+# Target: x86_64-unknown-linux-gnu
+# Thread model: posix
+# InstalledDir: /usr/bin
 ```
 
-# Zero-knowledge proof workflow
+# Building circuits and proof locally
 
-# Step 1 : Build the intermediate representation (IR) file
+## Step 0: Setup build environment
+
+First, make a clean build directory and initialize cmake:
+
 ``` 
 mkdir build && cd build
-cmake .. && make template
+cmake ..
 ```
-You should have a circuit IR file called `template.ll` 
+
+## Step 1: Build an circuit-base file
+
+Time to compile our code from `./src/main.cpp` with zkllvm!
+
+```
+make template
+```
+
+As a result of this command, you will have a circuit file at 
+`./build/src/template.bc`, where `bc` stands for byte code.
+It's a file in LLVM's intermediate representation format and
+for now it will serve as a circuit base.
+
+```mermaid
+
+```
+
+## Step 2: Build the proof for specific input & output
+
+
+Next, we will use the `assigner`, which is a part of the zkLLVM toolchain,
+to generate the proof
+
+```
+assigner \
+  -b src/template.bc \
+  -i ../src/main.inp \
+  -t template.tbl \
+  -c template.crct \
+  -e pallas
+```
+
+As a result, you will have two new files:
+
+* `template.crct` is *the* circuit - representation of our code that can be used to prove calculations.
+* `template.tbl` is an assignment table – the 
+
+
+# Working with proof market
 
 # Step 2: Setup proof market user/toolchain
 Please navigate out of the `zkllvm-tfemplate` repository
