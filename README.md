@@ -53,6 +53,7 @@ cd /opt/zkllvm-template
 
 Let's check that we have the zkLLVM compiler available.
 Note that it replaces original clang, being a fully compatible drop-in replacement:
+
 ```
 clang --version
 # clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
@@ -61,7 +62,11 @@ clang --version
 # InstalledDir: /usr/bin
 ```
 
-# Building circuits and proof locally
+# Local development workflow
+
+In the first part of this tutorial, we'll walk through the development workflow on
+a local machine, without using Proof Market.
+We will build a circuit, generate a proof, and then verify this proof.
 
 ## Step 0: Setup build environment
 
@@ -72,21 +77,30 @@ mkdir build && cd build
 cmake ..
 ```
 
-## Step 1: Build an circuit-base file
+## Step 1: Build a byte-code representation of the circuit
 
 Time to compile our code from `./src/main.cpp` with zkllvm!
+In our code, we have a `[[circuit]]` section, which is the circuit itself.
+We will use zkLLVM compiler to make a byte-code representation of this circuit.
 
 ```
 make template
 ```
 
-As a result of this command, you will have a circuit file at 
-`./build/src/template.bc`, where `bc` stands for byte code.
-It's a file in LLVM's intermediate representation format and
+As a result of this command, we will get a byte-code file 
+`./build/src/template.bc`.
+It's using the LLVM's intermediate representation format and
 for now it will serve as a circuit base.
 
 ```mermaid
-
+flowchart TD
+  subgraph Step 1
+  code(["source code (main.cpp)"])
+  zkllvm[/zkLLVM/]
+  bytecode(["bytecode (template.bc)"])
+  code --> zkllvm
+  zkllvm --> bytecode
+  end
 ```
 
 ## Step 2: Build the proof for specific input & output
@@ -97,17 +111,169 @@ to generate the proof
 
 ```
 assigner \
+  # use compiled bytecode
   -b src/template.bc \
+  # take input from main.inp
   -i ../src/main.inp \
-  -t template.tbl \
+  # write constraint file to template.crct
   -c template.crct \
+  # write assignment table to template.tbl
+  -t template.tbl \
+  # use pallas arithmetization algorithm  
   -e pallas
 ```
 
-As a result, you will have two new files:
+As a result, we will have two new files:
 
-* `template.crct` is *the* circuit - representation of our code that can be used to prove calculations.
-* `template.tbl` is an assignment table – the 
+* `template.crct` is constraint file.
+  It is something like a mathematical model of our code's calculations, regardless of the input.
+  We will use it to calculate the proof and, later, to verify it.
+  
+* `template.tbl` is an assignment table.
+  It is based on the exact input values and contains their representation in the model above.
+  If you know what a *witness* is, assignment table plays the same role.
+
+
+```mermaid
+flowchart TD
+  code(["source code (main.cpp)"])
+  zkllvm[/zkLLVM/]
+  bytecode(["bytecode (template.bc)"])
+  code --> zkllvm
+  zkllvm --> bytecode
+  
+  subgraph Step 2
+  input(["public input (main.inp)"])
+  circuit(["constraint (template.crct)"])
+  tbl(["assignment table (template.tbl)"])
+  assigner[/assigner/]
+
+  bytecode --> assigner
+  input --> assigner
+  assigner --> tbl
+  assigner --> circuit
+  end
+```
+
+## Step 3: generate a proof
+
+
+```mermaid
+flowchart TD
+  code(["source code (main.cpp)"])
+  zkllvm[/zkLLVM/]
+  bytecode(["bytecode (template.bc)"])
+  code --> zkllvm
+  zkllvm --> bytecode
+
+  input(["public input (main.inp)"])
+  circuit(["constraint (template.crct)"])
+  tbl(["assignment table (template.tbl)"])
+  assigner[/assigner/]
+
+  bytecode --> assigner
+  input --> assigner
+  assigner --> tbl
+  assigner --> circuit
+
+
+  subgraph Step 3
+  prover[/prover/]
+  proof([proof])
+
+  tbl --> prover
+  circuit --> prover
+  prover --> proof
+  end
+```
+
+
+## Step 4: Verify a proof
+
+
+```mermaid
+flowchart TD
+  code(["source code (main.cpp)"])
+  zkllvm[/zkLLVM/]
+  bytecode(["bytecode (template.bc)"])
+  code --> zkllvm
+  zkllvm --> bytecode
+
+  input(["public input (main.inp)"])
+  circuit(["constraint (template.crct)"])
+  tbl(["assignment table (template.tbl)"])
+  assigner[/assigner/]
+
+  bytecode --> assigner
+  input --> assigner
+  assigner --> tbl
+  assigner --> circuit
+
+
+  prover[/prover/]
+  proof([proof])
+
+  tbl --> prover
+  circuit --> prover
+  prover --> proof
+
+  verifier{verifier}
+  proof2(["proof,
+    provided to verifying party"])
+  circuit2(["constraint,
+    provided to verifying party"])
+  proof -.-> proof2
+  circuit -.-> circuit2
+
+  subgraph Step 4
+proof2 --> verifier
+circuit2 --> verifier
+  verifier --> yes
+  verifier --> no
+  end
+```
+
+## Overview
+
+
+```mermaid
+flowchart TD
+  code(["source code (main.cpp)"])
+  zkllvm[/zkLLVM/]
+  bytecode(["bytecode (template.bc)"])
+  code --> zkllvm
+  zkllvm --> bytecode
+  
+  input(["public input (main.inp)"])
+  circuit(["constraint (template.crct)"])
+  tbl(["assignment table (template.tbl)"])
+  assigner[/assigner/]
+
+  bytecode --> assigner
+  input --> assigner
+  assigner --> tbl
+  assigner --> circuit
+
+  prover[/prover/]
+  proof([proof])
+
+  tbl --> prover
+  circuit --> prover
+  prover --> proof
+  
+  verifier{verifier}
+  proof2(["proof,
+    provided to verifying party"])
+  circuit2(["constraint,
+    provided to verifying party"])
+  proof -.-> proof2
+  circuit -.-> circuit2
+
+proof2 --> verifier
+circuit2 --> verifier
+  verifier --> yes
+  verifier --> no
+```
 
 
 # Working with proof market
