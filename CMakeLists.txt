@@ -1,14 +1,27 @@
+#---------------------------------------------------------------------------#
+# Copyright (c) 2018-2023 Mikhail Komarov <nemo@nil.foundation>
+#
+# Distributed under the Boost Software License, Version 1.0
+# See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt
+#---------------------------------------------------------------------------#
+
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
+cmake_policy(SET CMP0028 NEW)
+cmake_policy(SET CMP0042 NEW)
+cmake_policy(SET CMP0048 NEW)
+cmake_policy(SET CMP0057 NEW)
+cmake_policy(SET CMP0077 NEW)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
-     "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/share/modules/cmake"
-     "/usr/share/zkllvm")
+     "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/share/modules/cmake")
 
 include(CMConfig)
+include(CMDeploy)
 include(CMSetupVersion)
-include(CircuitCompile)
 
-cm_workspace(crypto3)
+cm_workspace(zkllvm)
 
 macro(cm_find_package NAME)
     if(NOT "${NAME}" MATCHES "^${CMAKE_WORKSPACE_NAME}_.*$" AND NOT "${NAME}" STREQUAL CM)
@@ -18,9 +31,5 @@ macro(cm_find_package NAME)
     endif()
 endmacro()
 
-cm_setup_version(VERSION 0.1.0 PREFIX ${CMAKE_WORKSPACE_NAME})
-
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libs/crypto3")
-
-#Example directories
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src")
