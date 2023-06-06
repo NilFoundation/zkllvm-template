@@ -1,0 +1,29 @@
+name: Test the development workflow
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+concurrency:
+  group: ${{
+    ( github.ref == 'refs/heads/master' &&
+    format('{0}/{1}', github.run_id, github.run_attempt) )
+    ||
+    format('{0}/{1}', github.workflow, github.ref) }}
+  cancel-in-progress: true
+
+env:
+  SCRIPT_NAME: docker-run.sh
+
+jobs:
+  test-ll-workflow:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Run the workflow script
+        run: scripts/${{ env.SCRIPT_NAME }}
