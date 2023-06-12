@@ -24,3 +24,7 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/libs/crypto3")
 
 #Example directories
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/src")
+
+if (BUILD_TESTS)
+    add_subdirectory(test)
+endif()

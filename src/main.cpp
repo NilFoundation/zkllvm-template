@@ -1,6 +1,6 @@
 #include <nil/crypto3/hash/algorithm/hash.hpp>
 #include <nil/crypto3/hash/sha2.hpp>
-#include "lib.hpp";
+#include "lib.hpp"
 
 using namespace nil::crypto3;
 

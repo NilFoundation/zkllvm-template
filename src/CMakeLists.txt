@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+
 function(add_example example_target)
     set(prefix ARG)
     set(noValues "")
@@ -39,4 +41,4 @@ function(add_example example_target)
                 ${Boost_LIBRARIES})
 endfunction()
 
-add_example(template SOURCES main.cpp INPUT main.inp)
+add_example(zkllvm_circuit SOURCES main.cpp INPUT main.inp)
