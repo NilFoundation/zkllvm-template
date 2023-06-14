@@ -13,11 +13,8 @@ concurrency:
     format('{0}/{1}', github.workflow, github.ref) }}
   cancel-in-progress: true
 
-env:
-  SCRIPT_NAME: docker-run.sh
-
 jobs:
-  test-ll-workflow:
+  test-zkllvm-workflow:
     runs-on: ubuntu-22.04
 
     steps:
@@ -25,5 +22,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Run the workflow script
-        run: scripts/${{ env.SCRIPT_NAME }}
+      - name: Compile a circuit
+        run: scripts/ci.sh --docker compile
+
+      - name: Make constraint and assignment table
+        run: scripts/ci.sh --docker run_assigner
