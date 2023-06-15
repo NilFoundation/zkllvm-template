@@ -25,5 +25,11 @@ jobs:
       - name: Compile a circuit
         run: scripts/ci.sh --docker compile
 
-      - name: Make constraint and assignment table
+      - name: Make constraint and assignment table (optional)
         run: scripts/ci.sh --docker run_assigner
+
+      - name: Build a statement for the Proof Market
+        run: scripts/ci.sh --docker build_statement
+
+      - name: Calculate a proof
+        run: scripts/ci.sh --docker prove
