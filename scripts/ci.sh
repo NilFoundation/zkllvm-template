@@ -109,18 +109,22 @@ build_statement() {
 prove() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
+
+        # workaround for https://github.com/NilFoundation/proof-market-toolchain/issues/61
+        mkdir -p .config
+        touch .config/config.ini
+
         $DOCKER run $DOCKER_OPTS \
           --rm \
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
+          --volume $(pwd)/.config:/proof-market-toolchain/.config \
           ghcr.io/nilfoundation/proof-market-toolchain:latest \
           sh -c "bash /opt/zkllvm-template/scripts/ci.sh prove"
         cd -
     else
-        # workaround for https://github.com/NilFoundation/proof-market-toolchain/issues/61
-        mkdir -p .config
-        touch .config/config.ini
+        cd "$REPO_ROOT"
         proof-generator \
             --circuit_input="$REPO_ROOT/build/template.json" \
             --public_input="$REPO_ROOT/src/main-input.json" \
