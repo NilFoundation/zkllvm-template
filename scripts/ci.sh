@@ -119,6 +119,7 @@ prove() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
+          --volume $(pwd)/.config:/root/.config \
           --volume $(pwd)/.config:/proof-market-toolchain/.config \
           ghcr.io/nilfoundation/proof-market-toolchain:latest \
           sh -c "bash /opt/zkllvm-template/scripts/ci.sh prove"
