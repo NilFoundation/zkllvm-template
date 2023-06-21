@@ -37,7 +37,7 @@ compile() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:latest \
+          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
           sh -c "bash ./scripts/ci.sh compile"
         cd -
     else
@@ -62,7 +62,7 @@ run_assigner() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:latest \
+          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
           sh -c "bash ./scripts/ci.sh run_assigner"
         cd -
     else
@@ -90,7 +90,7 @@ build_statement() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/proof-market-toolchain:latest \
+          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}  \
           sh -c "bash /opt/zkllvm-template/scripts/ci.sh build_statement"
         cd -
     else
@@ -121,7 +121,7 @@ prove() {
           --volume $(pwd):/opt/zkllvm-template \
           --volume $(pwd)/.config:/root/.config \
           --volume $(pwd)/.config:/proof-market-toolchain/.config \
-          ghcr.io/nilfoundation/proof-market-toolchain:latest \
+          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash /opt/zkllvm-template/scripts/ci.sh prove"
         cd -
     else
