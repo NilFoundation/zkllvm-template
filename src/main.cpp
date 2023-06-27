@@ -6,5 +6,5 @@ using namespace nil::crypto3;
     hashes::sha2<256>::block_type left,
     hashes::sha2<256>::block_type right
 ) {
-    return hash_pair(left, right);
+    return hash_pair<hashes::sha2<256>>(left, right);
 }

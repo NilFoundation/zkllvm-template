@@ -8,26 +8,20 @@
 
 #include "lib.hpp"
 
-std::string intToHex(unsigned int value) {
-    std::stringstream sstream;
-    sstream << std::hex << value;
-    return sstream.str();
-}
-
-std::string hash256ToHex(hashes::sha2<256>::block_type hash) {
-    std::array<std::string, 16> elems;
-    std::transform(hash.begin(), hash.end(), elems.begin(), intToHex);
-    return boost::algorithm::join(elems, "");
-}
 
 BOOST_AUTO_TEST_SUITE(lib_test)
 
 BOOST_AUTO_TEST_CASE(test_balance) {
-    std::string expected = "9a5ee745fda52931b4174b0ea83af76e48f32e03c9ad6fc563c580c2497302fd";
-    typename hashes::sha2<256>::block_type root = hash_pair(
-        hashes::sha2<256>::block_type {1},
-        hashes::sha2<256>::block_type {2}
+    std::string expected = "ff55c97976a840b4ced964ed49e3794594ba3f675238b5fd25d282b60f70a194";
+
+    auto left = hashes::sha2<256>::block_type {1};
+    auto right = hashes::sha2<256>::block_type {2};
+    
+    typename hashes::sha2<256>::digest_type root = hash_pair<hashes::sha2<256>>(
+        left, right
     );
-    BOOST_TEST(hash256ToHex(root) == expected);
+    auto actual = std::to_string(root);
+    BOOST_TEST(actual == expected);
 }
+
 BOOST_AUTO_TEST_SUITE_END()
