@@ -45,7 +45,7 @@ compile() {
         mkdir -p "$REPO_ROOT/build"
         cd "$REPO_ROOT/build"
         cmake -DCIRCUIT_ASSEMBLY_OUTPUT=TRUE ..
-        make template
+        VERBOSE=1 make template
         cd -
         check_file_exists "$REPO_ROOT/build/src/template.ll"
     fi
