@@ -2,9 +2,12 @@
 
 using namespace nil::crypto3;
 
-[[circuit]] typename hashes::sha2<256>::block_type circuit(
-    hashes::sha2<256>::block_type left,
-    hashes::sha2<256>::block_type right
+constexpr size_t INPUT_SIZE = 16;
+
+[[circuit]] unsigned int circuit(
+    uint64_t left,
+    uint64_t right,
+    hashes::sha2<256>::digest_type expected
 ) {
-    return hash_pair<hashes::sha2<256>>(left, right);
+    circuitImpl(left, right, expected);
 }

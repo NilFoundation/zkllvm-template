@@ -13,6 +13,7 @@ if(NOT Boost_UNIT_TEST_FRAMEWORK_FOUND)
 endif()
 
 cm_test_link_libraries(${Boost_LIBRARIES} template_lib)
+option(TEST_TRACING "OUTPUT TRACE DATA" OFF)
 
 macro(define_test name)
     cm_test(NAME ${name}_test SOURCES ${name}.cpp)
@@ -23,8 +24,13 @@ macro(define_test name)
     if(target_type STREQUAL "SHARED_LIB")
         target_compile_definitions(${name}_test PRIVATE BOOST_TEST_DYN_LINK)
     elseif(target_type STREQUAL "STATIC_LIB")
-
     endif()
+
+    if (${TEST_TRACING})
+        target_compile_definitions(${name}_test PRIVATE TEST_TRACING=1)
+    endif()
+
+
 
     # if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     #     target_compile_options(${name}_test PRIVATE "-fconstexpr-steps=2147483647")
@@ -38,6 +44,7 @@ macro(define_test name)
 endmacro()
 
 set(TESTS_NAMES
+    "hash"
     "lib"
 )
 
