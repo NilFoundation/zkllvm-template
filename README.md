@@ -152,18 +152,12 @@ python3 scripts/proof_tools.py push --bid_key <key of the bid> --ask_key <key of
 
 # Common issues
 
-## Compilation Errors
-If you have more than one compiler installed i.e g++ & clang++. The make system might pick up the former. You can explicitly force usage of 
-clang++ by finding the path and passing it in the variable below.
+## Compilation errors
 
-```
+If you have more than one compiler installed, for example, g++ & clang++, `cmake` might pick up the former.
+You can explicitly force usage of clang++ by finding the path and passing it in a variable:
+
+```bash
 `which clang++`  
 cmake .. -DCMAKE_CXX_COMPILER=<path to clang++ from above>
 ```
-
-## Submodule management
-Git maintains a few places where submodule details are cached. Sometimes updates do not come through. ex: Deletion , updating
-a url of a previously checked out submodule.It is advisable to check these locations for remains or try a new checkout.
-- .gitmodules
-- .git/config
-- .git/modules/*
