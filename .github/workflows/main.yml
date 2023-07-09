@@ -1,4 +1,4 @@
-name: Test the development workflow
+name: tutorial_check
 
 on:
   push:
@@ -27,13 +27,13 @@ jobs:
           submodules: recursive
 
       - name: Compile a circuit
-        run: scripts/ci.sh --docker compile
+        run: scripts/run.sh --verbose --docker compile
 
       - name: Make constraint and assignment table (optional)
-        run: scripts/ci.sh --docker run_assigner
+        run: scripts/run.sh --verbose --docker run_assigner
 
       - name: Build a statement for the Proof Market
-        run: scripts/ci.sh --docker build_statement
+        run: scripts/run.sh --verbose --docker build_statement
 
       - name: Calculate a proof
-        run: scripts/ci.sh --docker prove
+        run: scripts/run.sh --verbose --docker prove
