@@ -106,11 +106,16 @@ build_statement() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
+          --volume $(pwd)/.config:/.config/ \
+          --volume $(pwd)/.config:/root/.config/ \
+          --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
           ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}  \
           sh -c "bash /opt/zkllvm-template/scripts/run.sh build_statement"
         cd -
     else
-        python3 /proof-market-toolchain/scripts/prepare_statement.py \
+        cd /opt/zkllvm-template/
+        python3 \
+            /proof-market-toolchain/scripts/prepare_statement.py \
             --circuit "$REPO_ROOT/build/src/template.ll" \
             --name template --type placeholder-zkllvm \
             --output "$REPO_ROOT/build/template.json"
@@ -135,8 +140,9 @@ prove() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          --volume $(pwd)/.config:/root/.config \
-          --volume $(pwd)/.config:/proof-market-toolchain/.config \
+          --volume $(pwd)/.config:/.config/ \
+          --volume $(pwd)/.config:/root/.config/ \
+          --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
           ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash /opt/zkllvm-template/scripts/run.sh prove"
         cd -
