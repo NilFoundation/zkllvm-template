@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+
+# This script has all the commands from the tutorial,
+# conveniently running in a Docker or Podman environment.
+# You can run them with this script to get the job done quick,
+# or enter them manually when you want to get into more detail.
+# Besides that, each command is checked in CI, just to make sure that
+# everything works for you when you run it yourself.
+
 set -euxo pipefail
 
 # define dirs so that we can run scripts from any directory without shifting filesystem paths
@@ -46,7 +54,7 @@ compile() {
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
           ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/ci.sh compile"
+          sh -c "bash ./scripts/run.sh compile"
         cd -
     else
         rm -rf "$REPO_ROOT/build"
@@ -71,7 +79,7 @@ run_assigner() {
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
           ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/ci.sh run_assigner"
+          sh -c "bash ./scripts/run.sh run_assigner"
         cd -
     else
         cd "$REPO_ROOT/build"
@@ -99,7 +107,7 @@ build_statement() {
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
           ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}  \
-          sh -c "bash /opt/zkllvm-template/scripts/ci.sh build_statement"
+          sh -c "bash /opt/zkllvm-template/scripts/run.sh build_statement"
         cd -
     else
         python3 /proof-market-toolchain/scripts/prepare_statement.py \
@@ -130,7 +138,7 @@ prove() {
           --volume $(pwd)/.config:/root/.config \
           --volume $(pwd)/.config:/proof-market-toolchain/.config \
           ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION} \
-          sh -c "bash /opt/zkllvm-template/scripts/ci.sh prove"
+          sh -c "bash /opt/zkllvm-template/scripts/run.sh prove"
         cd -
     else
         cd "$REPO_ROOT"
@@ -155,6 +163,7 @@ SUBCOMMAND=run_all
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -d|--docker) USE_DOCKER=true ;;
+        -v|--verbose) set -x ;;
         all) SUBCOMMAND=run_all ;;
         compile) SUBCOMMAND=compile ;;
         run_assigner) SUBCOMMAND=run_assigner ;;
