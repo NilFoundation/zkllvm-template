@@ -159,6 +159,15 @@ prove() {
     fi
 }
 
+
+pull_zkllvm() {
+  $DOCKER pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
+}
+
+pull_pm_toolchain() {
+  $DOCKER pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
+}
+
 run_all() {
     compile
     run_assigner
@@ -178,6 +187,8 @@ while [[ "$#" -gt 0 ]]; do
         run_assigner) SUBCOMMAND=run_assigner ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
+        pull_zkllvm) SUBCOMMAND=pull_zkllvm ;;
+        pull_pm_toolchain) SUBCOMMAND=pull_pm_toolchain ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift

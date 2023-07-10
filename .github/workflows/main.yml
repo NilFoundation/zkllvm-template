@@ -26,11 +26,17 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Pull the zkLLVM image
+        run: scripts/run.sh --verbose pull_zkllvm
+
       - name: Compile a circuit
         run: scripts/run.sh --verbose --docker compile
 
       - name: Make constraint and assignment table (optional)
         run: scripts/run.sh --verbose --docker run_assigner
+
+      - name: Pull the toolchain image
+        run: scripts/run.sh --verbose pull_pm_toolchain
 
       - name: Build a statement for the Proof Market
         run: scripts/run.sh --verbose --docker build_statement
