@@ -15,11 +15,11 @@ REPO_ROOT="$SCRIPT_DIR/.."
 
 # Set image versions in the environment before running this script:
 # export ZKLLVM_VERSION=0.0.58
-# export TOOLCHAIN_VERSION=0.0.31
+# export TOOLCHAIN_VERSION=0.0.33
 
 # If unset, default values will be used:
 echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.58}"
-echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.31}"
+echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.33}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
