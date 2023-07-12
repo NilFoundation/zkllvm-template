@@ -70,7 +70,7 @@ In the tutorial, we'll use the latest versions that are compatible with each oth
 
 ```bash
 export ZKLLVM_VERSION=0.0.58
-export TOOLCHAIN_VERSION=0.0.31
+export TOOLCHAIN_VERSION=0.0.33
 docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
 docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
 ```
@@ -197,7 +197,7 @@ docker run -it --rm \
     --volume $(pwd)/.config:/.config/ \
     --volume $(pwd)/.config:/root/.config/ \
     --user $(id -u ${USER}):$(id -g ${USER}) \
-    ghcr.io/nilfoundation/proof-market-toolchain:0.0.31
+    ghcr.io/nilfoundation/proof-market-toolchain:0.0.33
 ```
 
 > The `.config` directory is where you will put the credentials to the Proof Market later on.
