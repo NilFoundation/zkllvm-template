@@ -18,8 +18,8 @@ REPO_ROOT="$SCRIPT_DIR/.."
 # export TOOLCHAIN_VERSION=0.0.31
 
 # If unset, default values will be used:
-echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.58}"
-echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.31}"
+echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=zkbridge}"
+echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=zkbridge}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
