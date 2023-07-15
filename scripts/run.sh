@@ -44,6 +44,35 @@ check_file_exists() {
     fi
 }
 
+run_zkllvm() {
+    cd $REPO_ROOT
+    # silently stop the existing container if it's running already
+    $DOCKER rm zkllvm 2>/dev/null || true
+    $DOCKER run -it --rm \
+        --name zkllvm \
+        --volume $(pwd):/opt/zkllvm-template \
+        --user $(id -u ${USER}):$(id -g ${USER}) \
+        ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
+}
+
+run_proof_market_toolchain() {
+    cd $REPO_ROOT
+    # create files for storing credentials, so that they would persist
+    # after stopping a container
+    touch .config/config.ini .config/.user .config/.secret
+    # silently stop the existing container if it's running already
+    $DOCKER stop proof-market 2>/dev/null || true
+    $DOCKER run -it --rm \
+        --name proof-market \
+        --volume $(pwd):/opt/zkllvm-template \
+        --volume $(pwd)/.config:/.config/ \
+        --volume $(pwd)/.config:/root/.config/ \
+        --volume $(pwd)/.config/.user:/proof-market-toolchain/scripts/.user \
+        --volume $(pwd)/.config/.secret:/proof-market-toolchain/scripts/.secret \
+        --user $(id -u ${USER}):$(id -g ${USER}) \
+      ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
+}
+
 # Compile source code into a circuit
 # https://github.com/NilFoundation/zkllvm-template/#step-1-compile-a-circuit
 compile() {
@@ -178,6 +207,8 @@ while [[ "$#" -gt 0 ]]; do
         run_assigner) SUBCOMMAND=run_assigner ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
+        run_zkllvm) SUBCOMMAND=run_zkllvm ;;
+        run_proof_market_toolchain) SUBCOMMAND=run_proof_market_toolchain ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
