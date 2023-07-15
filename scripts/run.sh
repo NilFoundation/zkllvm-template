@@ -7,7 +7,7 @@
 # Besides that, each command is checked in CI, just to make sure that
 # everything works for you when you run it yourself.
 
-set -euxo pipefail
+set -euo pipefail
 
 # define dirs so that we can run scripts from any directory without shifting filesystem paths
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
