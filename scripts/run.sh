@@ -125,6 +125,42 @@ run_assigner() {
     fi
   }
 
+build_circuit_params() {
+    if [ "$USE_DOCKER" = true ] ; then
+        cd "$REPO_ROOT"
+        $DOCKER run $DOCKER_OPTS \
+          --rm \
+          --platform=linux/amd64 \
+          --user $(id -u ${USER}):$(id -g ${USER}) \
+          --volume $(pwd):/opt/zkllvm-template \
+          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
+          sh -c "bash ./scripts/run.sh build_circuit_params"
+        cd -
+    else
+        cd "$REPO_ROOT/build"
+        transpiler \
+          -m gen-gate-argument \
+          -i ../src/main-input.json \
+          -t template.tbl \
+          -c template.crct \
+          -o template \
+          --optimize-gates
+        check_file_exists "$REPO_ROOT/build/template/gate_argument.sol"
+        check_file_exists "$REPO_ROOT/build/template/linked_libs_list.json"
+        check_file_exists "$REPO_ROOT/build/template/public_input.json"
+        # todo: replace with gen-circuit-paramsg
+        transpiler \
+          -m gen-test-proof \
+          -i ../src/main-input.json \
+          -t template.tbl \
+          -c template.crct \
+          -o template
+        check_file_exists "$REPO_ROOT/build/template/circuit_params.json"
+        check_file_exists "$REPO_ROOT/build/template/proof.bin"
+        cd -
+    fi
+  }
+
 # Use the Proof Market toolchain to pack circuit into a statement
 # that can later be used to produce a proof locally or sent to the
 # Proof Market.
@@ -206,6 +242,7 @@ while [[ "$#" -gt 0 ]]; do
         all) SUBCOMMAND=run_all ;;
         compile) SUBCOMMAND=compile ;;
         run_assigner) SUBCOMMAND=run_assigner ;;
+        build_circuit_params) SUBCOMMAND=build_circuit_params ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
         run_zkllvm) SUBCOMMAND=run_zkllvm ;;
