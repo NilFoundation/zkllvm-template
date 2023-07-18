@@ -376,11 +376,15 @@ First, let's see what statements are available on the Proof Market.
 python3 scripts/statement_tools.py get
 ```
 
+If you're on a live workshop by `=nil;`, use the statement with id `96079532`.
+It's built from the circuit code in this template, and accepts input from
+`./src/main-input.json`.
+
 ## Step 2: Post a proof request
 
 ```bash
 python3 scripts/request_tools.py push \
-    --key 12345678 \
+    --key 96079532 \
     --cost 10 \
     --file /opt/zkllvm-template/src/main-input.json
 ```
@@ -390,7 +394,7 @@ The output will look like the following, but with different key values.
 ```
 Limit request:	 {
     "_key": "99887766",
-    "statement_key": "12345678",
+    "statement_key": "96079532",
     "cost": 10,
     "sender": "zkdev",
     "status": "created"
@@ -412,7 +416,7 @@ your request to a particular producer, and whether they have provided the proof.
 ```
 Limit request:	 {
     "_key": "99887766",
-    "statement_key": "12345678",
+    "statement_key": "96079532",
     "cost": 10,
     "sender": "zkdev",
     "status": "created"
