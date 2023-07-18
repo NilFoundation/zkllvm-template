@@ -29,8 +29,11 @@ jobs:
       - name: Compile a circuit
         run: scripts/run.sh --verbose --docker compile
 
-      - name: Make constraint and assignment table (optional)
+      - name: Make constraint and assignment table for EVM verifier endpoint
         run: scripts/run.sh --verbose --docker run_assigner
+
+      - name: Build circuit parameters for EVM verifier endpoint
+        run: scripts/run.sh --verbose --docker build_circuit_params
 
       - name: Build a statement for the Proof Market
         run: scripts/run.sh --verbose --docker build_statement
