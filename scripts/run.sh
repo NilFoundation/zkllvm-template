@@ -18,8 +18,8 @@ REPO_ROOT="$SCRIPT_DIR/.."
 # export TOOLCHAIN_VERSION=0.0.33
 
 # If unset, default values will be used:
-echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.58}"
-echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.33}"
+echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.84}"
+echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.35}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
@@ -115,7 +115,7 @@ run_assigner() {
         cd "$REPO_ROOT/build"
         assigner \
           -b src/template.ll \
-          -i ../src/main.inp \
+          -i ../src/main-input.json \
           -c template.crct \
           -t template.tbl \
           -e pallas
@@ -148,7 +148,9 @@ build_statement() {
         python3 \
             /proof-market-toolchain/scripts/prepare_statement.py \
             --circuit "$REPO_ROOT/build/src/template.ll" \
-            --name template --type placeholder-zkllvm \
+            --name template \
+            --type placeholder-zkllvm \
+            --private \
             --output "$REPO_ROOT/build/template.json"
         check_file_exists "$REPO_ROOT/build/template.json"
     fi
@@ -156,7 +158,6 @@ build_statement() {
 
 # Prove the circuit with particular input.
 # See the input files at:
-# ./src/main.inp
 # ./src/main-input.json
 # https://github.com/NilFoundation/zkllvm-template/#step-3-produce-and-verify-a-proof-locally
 prove() {

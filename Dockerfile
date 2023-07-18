@@ -1,7 +1,7 @@
 # build to ghcr.io/nilfoundation/zkllvm-template:latest
 FROM ghcr.io/nilfoundation/build-base:1.76.0
 
-ARG ZKLLVM_VERSION=0.0.58
+ARG ZKLLVM_VERSION=0.0.84
 
 RUN DEBIAN_FRONTEND=noninteractive \
     echo 'deb [trusted=yes]  http://deb.nil.foundation/ubuntu/ all main' >> /etc/apt/sources.list \
