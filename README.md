@@ -1,42 +1,49 @@
 
 [![Tutorial check](https://github.com/NilFoundation/zkllvm-template/actions/workflows/main.yml/badge.svg)](https://github.com/NilFoundation/zkllvm-template/actions/workflows/main.yml)
 
-# zkLLVM Tutorial and template project
+# zkLLVM tutorial and template project
 
 Tutorial and a template repository for a zk-enabled application project
 based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
 Use it to learn about developing zk-enabled apps with zkLLVM step-by-step.
 
-For this tutorial, you will need an amd64 machine with Docker (on Linux) or Docker Desktop (on macOS).
-
+For this tutorial, you will need an amd64 machine with Docker or Podman (on Linux)
+or Docker Desktop (on macOS).
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Preparing environment for the tutorial](#preparing-environment-for-the-tutorial)
+- [Introduction](#introduction)
+- [Getting started](#getting-started)
   - [1. Clone the template repository and submodules](#1-clone-the-template-repository-and-submodules)
-  - [2. Get the Docker images with =nil; toolchain](#2-get-the-docker-images-with-nil-toolchain)
-- [Part 1. Local development workflow](#part-1-local-development-workflow)
+  - [2. Get the Docker images with `=nil;` toolchain](#2-get-the-docker-images-with-nil-toolchain)
+- [Part 1. Circuit development workflow](#part-1-circuit-development-workflow)
   - [Step 1: Compile a circuit](#step-1-compile-a-circuit)
   - [Step 2: Build a circuit statement](#step-2-build-a-circuit-statement)
   - [Step 3: Produce and verify a proof locally](#step-3-produce-and-verify-a-proof-locally)
-- [Part 2. Proof Market workflow](#part-2-proof-market-workflow)
-  - [Step 2: Setup proof market user/toolchain](#step-2-setup-proof-market-usertoolchain)
-  - [Step 2: Prepare circuit to publish to Proof Market](#step-2-prepare-circuit-to-publish-to-proof-market)
-  - [Step 4: See All Published circuits](#step-4-see-all-published-circuits)
-  - [Step 5: Push a Bid](#step-5-push-a-bid)
-  - [Step 6: Push an Ask](#step-6-push-an-ask)
-  - [Step 7 : Fetch statements/inputs for proof generation](#step-7--fetch-statementsinputs-for-proof-generation)
-  - [Step 8 : Generate Proof](#step-8--generate-proof)
-  - [Step 9: Publish Proof](#step-9-publish-proof)
-- [Common issues](#common-issues)
-  - [Compilation errors](#compilation-errors)
+  - [Step 4: Make an account on the Proof Market](#step-4-make-an-account-on-the-proof-market)
+  - [Step 5: Publish the circuit statement](#step-5-publish-the-circuit-statement)
+  - [Step 6: Check the information about your statement](#step-6-check-the-information-about-your-statement)
+- [Part 2. Application developer workflow](#part-2-application-developer-workflow)
+  - [Step 1: See the statements available on the Proof Market](#step-1-see-the-statements-available-on-the-proof-market)
+  - [Step 2: Post a proof request](#step-2-post-a-proof-request)
+  - [Step 3: Check if the proof is ready](#step-3-check-if-the-proof-is-ready)
+  - [Step 4: Download the proof](#step-4-download-the-proof)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+# Introduction
 
-# Preparing environment for the tutorial
+You will run each step of this tutorial as a command, conveniently wrapped in the `scripts/run.sh` script.
+We recommend using it when you go through the tutorial for the first time.
+
+Once you've completed the tutorial, you can repeat it by running all commands manually in the console.
+Look at the `🧰 [manual mode]` instructions in collapsed blocks.
+They have all the steps with detailed explanations of commands and their parameters,
+file formats and other things.
+
+# Getting started
 
 ## 1. Clone the template repository and submodules
 
@@ -55,41 +62,39 @@ git submodule update --init --recursive
 
 ## 2. Get the Docker images with `=nil;` toolchain
 
-We've prepared Docker images with parts of the `=nil;` toolchain 
-that you'll need to run through all development stages with this template.
+In the tutorial, we will use Docker images with parts of the `=nil;` toolchain.
 We recommend using them because they're tested for compatibility,
-and they save you time on installing and compiling everything.
+and they save you time on installing and compiling everything:
 
-* `nilfoundation/zkllvm-template` has the zkLLVM part of the toolchain:
-  the zkLLVM compiler (`clang`), `assigner`, and `tranpiler` binaries.
-* `nilfoundation/proof-market-toolchain` has all you need to make an account on 
-  the `=nil;` Proof Market, put your circuit on it, and order a proof.
+* The `nilfoundation/zkllvm-template` image has the zkLLVM part of the toolchain,
+  including the zkLLVM compiler (`clang`), `assigner`, and `tranpiler` binaries.
 
-These images are versioned according to the products they contain.
-In the tutorial, we'll use the latest versions that are compatible with each other.
+* The `nilfoundation/proof-market-toolchain` image has all you need to make an account on 
+the `=nil;` Proof Market, put your circuit on it, and order a proof.
+
+Both images are versioned according to the products they contain.
+In the tutorial, we'll use the latest compatible versions of both images:
 
 ```bash
-export ZKLLVM_VERSION=0.0.58
-export TOOLCHAIN_VERSION=0.0.33
+ZKLLVM_VERSION=0.0.58
 docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
+
+TOOLCHAIN_VERSION=0.0.33
 docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
 ```
 
-# Part 1. Local development workflow
+# Part 1. Circuit development workflow
 
-In the first part of this tutorial, we'll walk through the development workflow on
-a local machine, without using the Proof Market.
+In the first part of this tutorial, we'll walk through the development workflow
+of a circuit developer.
+Most operations will be done on a local machine, without using the Proof Market.
 We will build a circuit, pack it into a circuit statement,
-and then use it to verify a proof for a particular input. 
+and then use it to build a proof for a particular input.
+Last thing, we'll post the statement on the Proof Market,
+so that zk application developers will be able to request proofs with this statement.
 
-You will run each step as a command, conveniently wrapped in the `./scripts/run.sh` script.
-We recommend using it when you go through the tutorial for the first time.
-
-Once you've completed the tutorial, you can repeat it by running all commands manually in the console.
-Look at the `[manual mode]` instructions in collapsed blocks.
-
-Code in `./src` is an example of BLS12-381 signature verification via zkLLVM using
-[Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3) as an SDK.
+Code in `./src` is using the
+[Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3).
 
 ## Step 1: Compile a circuit
 
@@ -100,7 +105,7 @@ We will use zkLLVM compiler to make a byte-code representation of this circuit.
 Run the script from the root of your project.
 
 ```bash
-./scripts/run.sh --docker compile
+scripts/run.sh --docker compile
 ```
 
 The `compile` command does the following:
@@ -110,12 +115,12 @@ The `compile` command does the following:
 3. Compiles the code into a circuit.
 
 <details>
-  <summary><code>[manual mode]</code></summary>
+  <summary><code>🧰 [manual mode]</code></summary>
 
-Start a Docker container with zkLLVM toolchain:
+Start a Docker container with the zkLLVM toolchain:
 
 ```bash
-docker run -it --rm \
+docker run --detach --rm \
     --platform=linux/amd64 \
     --volume $(pwd):/opt/zkllvm-template \
     --user $(id -u ${USER}):$(id -g ${USER}) \
@@ -173,7 +178,7 @@ The `build_statement` command will build a circuit statement from the circuit
 that we compiled earlier:
 
 ```bash
-./scripts/run.sh --docker build_statement
+scripts/run.sh --docker build_statement
 ```
 
 The `build_statement` command does the following:
@@ -182,7 +187,7 @@ The `build_statement` command does the following:
 2. In the container, runs `prepare_statement.py` to produce a circuit statement.
 
 <details>
-  <summary><code>[manual mode]</code></summary>
+  <summary><code>🧰 [manual mode]</code></summary>
 
 To build a statement, we will use the `prepare_statement.py` script,
 which is a part of the [Proof Market toolchain](https://github.com/nilfoundation/proof-market-toolchain).
@@ -196,6 +201,9 @@ docker run -it --rm \
     --volume $(pwd):/opt/zkllvm-template \
     --volume $(pwd)/.config:/.config/ \
     --volume $(pwd)/.config:/root/.config/ \
+    --volume $(pwd)/.config/.user:/proof-market-toolchain/scripts/.user \
+    --volume $(pwd)/.config/.secret:/proof-market-toolchain/scripts/.secret \
+    --volume $(pwd)/../proof-market-toolchain:/proof-market-toolchain/ \
     --user $(id -u ${USER}):$(id -g ${USER}) \
     ghcr.io/nilfoundation/proof-market-toolchain:0.0.33
 ```
@@ -231,25 +239,18 @@ We will also push this circuit statement to the Proof Market.
 ## Step 3: Produce and verify a proof locally
 
 Now we have everything ready to produce our first proof.
+As a circuit developer, we want to first build it locally, to check that our circuit is working.
 We'll use the `proof-generator` CLI, which is a part of the Proof Market toolchain.
 
 ```bash
-./scripts/run.sh --docker prove
+scripts/run.sh --docker prove
 ```
 
 <details>
-  <summary><code>[manual mode]</code></summary>
+  <summary><code>🧰 [manual mode]</code></summary>
 
 Continue in the `proof-market-toolchain` container that you made in step 2.
-
-First, create an empty configuration file in your user's directory.
-Later you will put the Proof Market credentials in it.
-
-```bash
-touch /opt/zkllvm-template/.config/config.ini
-```
-
-Next, run the `proof-generator` binary to generate a proof:
+Run the `proof-generator` binary to generate a proof:
 
 ```bash
 proof-generator \
@@ -280,97 +281,153 @@ a zero-knowledge succinct non-interactive argument of knowledge
 
 Now it's time to work with the `=nil;` Proof Market.
 
+## Step 4: Make an account on the Proof Market
 
-# Part 2. Proof Market workflow
+To publish statements and order proofs from the Proof Market, you need an account.
+We'll use the command line tools to create a new one.
 
-In this part, we will interact with the Proof Market in two roles:
+First, run a Docker container with the Proof Market toolchain:
 
-* As a circuit developer, who puts a circuit on the market.
-* As a zkApp developer, who orders proofs from the market.
-
-## Step 2: Setup proof market user/toolchain
-Please navigate out of the `zkllvm-tfemplate` repository
-
-Clone the proof-market-toolchain repository
-
-```
-git clone --recurse-submodules git@github.com:NilFoundation/proof-market-toolchain.git
-cd proof-market-toolchain
+```bash
+cd /opt/zkllvm-template
+scripts/run.sh run_proof_market_toolchain
 ```
 
-- Create a new user
-All access to market requires authentication. Please ensure you have a valid username/password. If you have not registered , please look at instructions on how to here via front end .
-Or , you can use the below command line in the proof-market-toolchain repository.
+Great, now you're in the container's console.
+Time to make an account:
 
-```
-python3 signup.py -u <username> -p <password> -e <e-mail>
-```
-
-Create a .user and a .secret file and add your username and password to it,
-You should do this inside the scripts directory in the proof market tool-chain repository.
-.user file should consist of your username (without newline)
-
-```
-username
-```
-.secret file should consist of your password(without newline)
-```
-password
+```bash
+cd /proof-market-toolchain
+python3 scripts/signup.py user \
+    -u <username> \
+    -p <password> \
+    -e <email>
 ```
 
-## Step 2: Prepare circuit to publish to Proof Market
+It should return something like this:
+
+```json
+{"user":"zkdev","active":true,"extra":{},"error":false,"code":201}
 ```
-python3 scripts/prepare_statement.py -c=/root/tmp/zkllvm/build/examples/arithmetics_example.ll -o=arithmetic.json -n=arithmetic -t=placeholder-zkllvm
+
+This command will save your username and password in two files in the container:
+* `/proof-market-toolchain/scripts/.user`
+* `/proof-market-toolchain/scripts/.secret`
+
+These files in the container are mounted to `.config/.user` and `.config/.secret` on your machine.
+This way, when you stop the container, the files will persist until you run it again.
+
+## Step 5: Publish the circuit statement
+
+Remember the statement that we've packed in step 2?
+Let's publish it on the Proof Market.
+
+```bash
+python3 scripts/statement_tools.py push \
+    --file /opt/zkllvm-template/build/template.json
 ```
-  
-## Step 4: See All Published circuits
+
+This command will return the following output with your statement's ID (key):
 ```
+Statement from /opt/zkllvm-template/build/template.json was pushed with key 12345678.
+```
+
+## Step 6: Check the information about your statement
+
+Let's see how the statement is published:
+
+```bash
+python3 scripts/statement_tools.py get \
+    --key 12345678
+```
+
+You should see all the details of your statement in response.
+
+Congratulations! You've built a zkLLVM circuit and published it on the Proof Market.
+Now it's time to have a look at how developers of zero-knowledge applications 
+use the Proof Market.
+
+# Part 2. Application developer workflow
+
+In this part, we will act as a developer of a zk application.
+Our task is to order a proof on the Proof Market:
+
+1. Find a circuit statement.
+   We will be using one that has active proof producers,
+   who will respond to our request.
+2. Post a request for a proof with given statement and particular input.
+3. Check that a request was matched and the proof is ready.
+4. Download the proof.
+
+All commands in this section run in the container `nilfoundation/proof-market-toolchain`:
+
+```bash
+cd /opt/zkllvm-template
+scripts/run.sh run_proof_market_toolchain
+```
+
+## Step 1: See the statements available on the Proof Market
+
+First, let's see what statements are available on the Proof Market.
+
+```bash
 python3 scripts/statement_tools.py get
 ```
 
-## Step 5: Push a Bid
-```
-python3 scripts/bid_tools.py push --cost <cost of the bid> --file <json file with public_input> --key <key of the statement> 
-```
-
-## Step 6: Push an Ask
-```
-python3 scripts/ask_tools.py push --cost <cost of the ask> --key <key of the statement> 
-```
-
-## Step 7 : Fetch statements/inputs for proof generation
-```
-python3 scripts/statement_tools.py get --key <key of the statement> -o <output file>
-python3 scripts/public_input_get.py --key <bid key> -o <output file path> 
-```
-
-## Step 8 : Generate Proof
-- Build proof generator
-```
-mkdir build && cd build
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/bin/clang-12 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-12 ..
-# Single-threaded version
-cmake --build . -t proof-generator
-```
-- Generate Proof!
-```
-./bin/proof-generator/proof-generator --proof_out=/root/workshop/arith_proof.out --circuit_input=/root/tmp/proof-market-toolchain/arithmetic.json --public_input=/root/tmp/proof-market-toolchain/example/input/arithmetic_example/input.json
-```
-
-## Step 9: Publish Proof
-```
-python3 scripts/proof_tools.py push --bid_key <key of the bid> --ask_key <key of the ask> --file <file with the proof> 
-```
-
-
-# Common issues
-
-## Compilation errors
-
-If you have more than one compiler installed, for example, g++ & clang++, `cmake` might pick up the former.
-You can explicitly force usage of clang++ by finding the path and passing it in a variable:
+## Step 2: Post a proof request
 
 ```bash
-`which clang++`  
-cmake .. -DCMAKE_CXX_COMPILER=<path to clang++ from above>
+python3 scripts/request_tools.py push \
+    --key 12345678 \
+    --cost 10 \
+    --file /opt/zkllvm-template/src/main-input.json
 ```
+
+The output will look like the following, but with different key values.
+
+```
+Limit request:	 {
+    "_key": "99887766",
+    "statement_key": "12345678",
+    "cost": 10,
+    "sender": "zkdev",
+    "status": "created"
+}
+```
+
+## Step 3: Check if the proof is ready
+
+You can check the request status at any time:
+
+```console
+python3 scripts/request_tools.py get --key 99887766
+```
+
+You should see almost the same output as before.
+Note the `status` field: it reflects whether the Proof Market has assigned
+your request to a particular producer, and whether they have provided the proof.
+
+```
+Limit request:	 {
+    "_key": "99887766",
+    "statement_key": "12345678",
+    "cost": 10,
+    "sender": "zkdev",
+    "status": "created"
+}
+```
+
+## Step 4: Download the proof
+
+When the proof is ready, download it:
+
+```bash
+python3 scripts/proof_tools.py get \ 
+    --request-key 99887766 \
+    --file /tmp/example.proof
+
+ls -l /tmp/example.proof
+```
+
+Now the proof can be verified, both off-chain and on-chain.
+These steps will be added soon.
