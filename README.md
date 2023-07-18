@@ -76,10 +76,10 @@ Both images are versioned according to the products they contain.
 In the tutorial, we'll use the latest compatible versions of both images:
 
 ```bash
-ZKLLVM_VERSION=0.0.58
+ZKLLVM_VERSION=0.0.84
 docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
 
-TOOLCHAIN_VERSION=0.0.33
+TOOLCHAIN_VERSION=0.0.35
 docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
 ```
 
@@ -218,15 +218,17 @@ Now pack the circuit into a statement:
 cd /opt/zkllvm-template/
 python3 \
     /proof-market-toolchain/scripts/prepare_statement.py \
-    -c /opt/zkllvm-template/build/src/template.ll \
-    -o /opt/zkllvm-template/build/template.json \
-    -n template \
-    -t placeholder-zkllvm
+    --circuit /opt/zkllvm-template/build/src/template.ll \
+    --name template \
+    --type placeholder-zkllvm \
+    --private \
+    --output /opt/zkllvm-template/build/template.json
   
-# -c: path to the circuit file
-# -o: path to write the statement file
-# -n: statement name
-# -t: type of proofs that will be generated with this statement
+# -c, --circuit: path to the circuit file
+# -n, --name: statement name
+# -o, --output: path to write the statement file
+# --private: make the statement private, as it's not intended for production usage
+# -t, --type: type of proofs that will be generated with this statement
 # (Placeholder is the name of our proof system, see
 # https://crypto3.nil.foundation/papers/placeholder.pdf)
 ```

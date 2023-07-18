@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ZKLLVM_VERSION: 0.0.58
-  TOOLCHAIN_VERSION: 0.0.33
+  ZKLLVM_VERSION: 0.0.84
+  TOOLCHAIN_VERSION: 0.0.35
 
 jobs:
   test-zkllvm-workflow:
