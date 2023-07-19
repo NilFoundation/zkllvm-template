@@ -100,7 +100,7 @@ compile() {
 # Use assigner to produce a constraint file and an assignment table.
 # This is not a part of the basic development workflow,
 # but can be used for debugging circuits.
-run_assigner() {
+build_constraint() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -109,7 +109,7 @@ run_assigner() {
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
           ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/run.sh run_assigner"
+          sh -c "bash ./scripts/run.sh build_constraint"
         cd -
     else
         cd "$REPO_ROOT/build"
@@ -227,9 +227,10 @@ prove() {
 
 run_all() {
     compile
-    run_assigner
     build_statement
     prove
+    build_constraint
+    build_circuit_params
 }
 
 USE_DOCKER=false
@@ -241,7 +242,7 @@ while [[ "$#" -gt 0 ]]; do
         -v|--verbose) set -x ;;
         all) SUBCOMMAND=run_all ;;
         compile) SUBCOMMAND=compile ;;
-        run_assigner) SUBCOMMAND=run_assigner ;;
+        build_constraint) SUBCOMMAND=build_constraint ;;
         build_circuit_params) SUBCOMMAND=build_circuit_params ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
