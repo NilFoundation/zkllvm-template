@@ -18,7 +18,7 @@ REPO_ROOT="$SCRIPT_DIR/.."
 # export TOOLCHAIN_VERSION=0.0.33
 
 # If unset, default values will be used:
-echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.84}"
+echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.86}"
 echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.36}"
 
 # podman is a safer option for using on CI machines
@@ -150,13 +150,12 @@ build_circuit_params() {
         check_file_exists "$REPO_ROOT/build/template/public_input.json"
         # todo: replace with gen-circuit-paramsg
         transpiler \
-          -m gen-test-proof \
+          -m gen-circuit-params \
           -i ../src/main-input.json \
           -t template.tbl \
           -c template.crct \
           -o template
         check_file_exists "$REPO_ROOT/build/template/circuit_params.json"
-        check_file_exists "$REPO_ROOT/build/template/proof.bin"
         cd -
     fi
   }
