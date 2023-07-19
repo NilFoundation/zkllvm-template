@@ -429,7 +429,7 @@ When the proof is ready, download it:
 
 ```bash
 python3 scripts/proof_tools.py get \ 
-    --request-key 99887766 \
+    --request_key 99887766 \
     --file /tmp/example.proof
 
 ls -l /tmp/example.proof
