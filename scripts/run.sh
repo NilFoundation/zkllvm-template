@@ -199,10 +199,10 @@ prove() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
 
+        mkdir -p $REPO_ROOT/build/template
         # workaround for https://github.com/NilFoundation/proof-market-toolchain/issues/61
         mkdir -p .config
         touch .config/config.ini
-
         $DOCKER run $DOCKER_OPTS \
           --rm \
           --platform=linux/amd64 \
@@ -219,9 +219,26 @@ prove() {
         proof-generator \
             --circuit_input="$REPO_ROOT/build/template.json" \
             --public_input="$REPO_ROOT/src/main-input.json" \
-            --proof_out="$REPO_ROOT/build/template.proof"
-        check_file_exists "$REPO_ROOT/build/template.proof"
+            --proof_out="$REPO_ROOT/build/template/proof.bin"
+        check_file_exists "$REPO_ROOT/build/template/proof.bin"
     fi
+}
+
+verify() {
+  if [ "$USE_DOCKER" = true ] ; then
+      cd "$REPO_ROOT"
+      $DOCKER run $DOCKER_OPTS \
+          --rm \
+          --volume $(pwd):/opt/zkllvm-template \
+          --volume $(pwd)/build/template:/opt/evm-placeholder-verification/contracts/zkllvm/template \
+          ghcr.io/nilfoundation/evm-placeholder-verification:latest \
+          sh -c "bash /opt/zkllvm-template/scripts/run.sh verify"
+      cd -
+  else
+      cd /opt/evm-placeholder-verification
+      npx hardhat deploy
+      npx hardhat verify-circuit-proof --test template
+  fi
 }
 
 run_all() {
@@ -230,6 +247,7 @@ run_all() {
     prove
     build_constraint
     build_circuit_params
+    verify
 }
 
 USE_DOCKER=false
@@ -245,6 +263,7 @@ while [[ "$#" -gt 0 ]]; do
         build_circuit_params) SUBCOMMAND=build_circuit_params ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
+        verify) SUBCOMMAND=verify ;;
         run_zkllvm) SUBCOMMAND=run_zkllvm ;;
         run_proof_market_toolchain) SUBCOMMAND=run_proof_market_toolchain ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
