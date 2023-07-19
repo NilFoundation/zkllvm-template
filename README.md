@@ -79,7 +79,7 @@ In the tutorial, we'll use the latest compatible versions of both images:
 ZKLLVM_VERSION=0.0.84
 docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
 
-TOOLCHAIN_VERSION=0.0.35
+TOOLCHAIN_VERSION=0.0.36
 docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
 ```
 
