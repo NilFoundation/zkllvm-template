@@ -26,6 +26,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: setup environment
+        run: |
+          export user_id=$(id -u)
+          export group_id=$(id -g)
+          scripts/run.sh init
+          docker compose up --build --detach
+
       - name: Compile a circuit
         run: scripts/run.sh --verbose --docker compile
 

@@ -20,15 +20,10 @@ REPO_ROOT="$SCRIPT_DIR/.."
 # If unset, default values will be used:
 echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.86}"
 echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.37}"
+echo "using nilfoundation/evm-placeholder-verification:${VERIFIER_VERSION:=latest}"
 
-# podman is a safer option for using on CI machines
-if ! command -v podman; then
-    DOCKER="docker"
-    DOCKER_OPTS=""
-else
-    DOCKER="podman"
-    DOCKER_OPTS='--detach-keys= --userns=keep-id'
-fi
+DOCKER="docker"
+DOCKER_OPTS=""
 
 # checking files that should be produced
 # on all steps of the pipeline
@@ -42,6 +37,13 @@ check_file_exists() {
         echo "File $FILE1 created successfully"
         ls -hal "$FILE1"
     fi
+}
+
+init() {
+  touch .config/.user
+  touch .config/.secret
+  touch .config/config.ini
+  mkdir -p build/template
 }
 
 run_zkllvm() {
@@ -78,17 +80,11 @@ run_proof_market_toolchain() {
 compile() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
-        $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --platform=linux/amd64 \
-          --user $(id -u ${USER}):$(id -g ${USER}) \
-          --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/run.sh compile"
+            $DOCKER compose exec zkllvm bash ./scripts/run.sh compile
         cd -
     else
         rm -rf "$REPO_ROOT/build"
-        mkdir -p "$REPO_ROOT/build"
+        mkdir -p "$REPO_ROOT/build/template"
         cd "$REPO_ROOT/build"
         cmake -DCIRCUIT_ASSEMBLY_OUTPUT=TRUE ..
         VERBOSE=1 make template
@@ -103,13 +99,7 @@ compile() {
 build_constraint() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
-        $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --platform=linux/amd64 \
-          --user $(id -u ${USER}):$(id -g ${USER}) \
-          --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/run.sh build_constraint"
+        $DOCKER compose exec zkllvm bash ./scripts/run.sh build_constraint
         cd -
     else
         cd "$REPO_ROOT/build"
@@ -128,13 +118,7 @@ build_constraint() {
 build_circuit_params() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
-        $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --platform=linux/amd64 \
-          --user $(id -u ${USER}):$(id -g ${USER}) \
-          --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
-          sh -c "bash ./scripts/run.sh build_circuit_params"
+        $DOCKER compose exec zkllvm bash ./scripts/run.sh build_circuit_params
         cd -
     else
         cd "$REPO_ROOT/build"
@@ -143,19 +127,18 @@ build_circuit_params() {
           -i ../src/main-input.json \
           -t template.tbl \
           -c template.crct \
-          -o template \
+          -o ../circuit_params \
           --optimize-gates
-        check_file_exists "$REPO_ROOT/build/template/gate_argument.sol"
-        check_file_exists "$REPO_ROOT/build/template/linked_libs_list.json"
-        check_file_exists "$REPO_ROOT/build/template/public_input.json"
-        # todo: replace with gen-circuit-paramsg
+        check_file_exists "$REPO_ROOT/circuit_params/gate_argument.sol"
+        check_file_exists "$REPO_ROOT/circuit_params/linked_libs_list.json"
+        check_file_exists "$REPO_ROOT/circuit_params/public_input.json"
         transpiler \
           -m gen-circuit-params \
           -i ../src/main-input.json \
           -t template.tbl \
           -c template.crct \
-          -o template
-        check_file_exists "$REPO_ROOT/build/template/circuit_params.json"
+          -o ../circuit_params
+        check_file_exists "$REPO_ROOT/circuit_params/circuit_params.json"
         cd -
     fi
   }
@@ -167,16 +150,7 @@ build_circuit_params() {
 build_statement() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
-        $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --platform=linux/amd64 \
-          --user $(id -u ${USER}):$(id -g ${USER}) \
-          --volume $(pwd):/opt/zkllvm-template \
-          --volume $(pwd)/.config:/.config/ \
-          --volume $(pwd)/.config:/root/.config/ \
-          --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
-          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}  \
-          sh -c "bash /opt/zkllvm-template/scripts/run.sh build_statement"
+        $DOCKER compose exec toolchain bash /opt/zkllvm-template/scripts/run.sh build_statement
         cd -
     else
         cd /opt/zkllvm-template/
@@ -203,36 +177,22 @@ prove() {
         # workaround for https://github.com/NilFoundation/proof-market-toolchain/issues/61
         mkdir -p .config
         touch .config/config.ini
-        $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --platform=linux/amd64 \
-          --user $(id -u ${USER}):$(id -g ${USER}) \
-          --volume $(pwd):/opt/zkllvm-template \
-          --volume $(pwd)/.config:/.config/ \
-          --volume $(pwd)/.config:/root/.config/ \
-          --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
-          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION} \
-          sh -c "bash /opt/zkllvm-template/scripts/run.sh prove"
+        $DOCKER compose exec toolchain bash /opt/zkllvm-template/scripts/run.sh prove
         cd -
     else
         cd "$REPO_ROOT"
         proof-generator \
             --circuit_input="$REPO_ROOT/build/template.json" \
             --public_input="$REPO_ROOT/src/main-input.json" \
-            --proof_out="$REPO_ROOT/build/template/proof.bin"
-        check_file_exists "$REPO_ROOT/build/template/proof.bin"
+            --proof_out="$REPO_ROOT/circuit_params/proof.bin"
+        check_file_exists "$REPO_ROOT/circuit_params/proof.bin"
     fi
 }
 
 verify() {
   if [ "$USE_DOCKER" = true ] ; then
       cd "$REPO_ROOT"
-      $DOCKER run $DOCKER_OPTS \
-          --rm \
-          --volume $(pwd):/opt/zkllvm-template \
-          --volume $(pwd)/build/template:/opt/evm-placeholder-verification/contracts/zkllvm/template \
-          ghcr.io/nilfoundation/evm-placeholder-verification:latest \
-          sh -c "bash /opt/zkllvm-template/scripts/run.sh verify"
+      $DOCKER compose exec verifier bash /opt/zkllvm-template/scripts/run.sh verify
       cd -
   else
       cd /opt/evm-placeholder-verification
@@ -264,6 +224,7 @@ while [[ "$#" -gt 0 ]]; do
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
         verify) SUBCOMMAND=verify ;;
+        init) SUBCOMMAND=init ;;
         run_zkllvm) SUBCOMMAND=run_zkllvm ;;
         run_proof_market_toolchain) SUBCOMMAND=run_proof_market_toolchain ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;

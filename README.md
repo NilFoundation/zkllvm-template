@@ -17,7 +17,7 @@ or Docker Desktop (on macOS).
 - [Introduction](#introduction)
 - [Getting started](#getting-started)
   - [1. Clone the template repository and submodules](#1-clone-the-template-repository-and-submodules)
-  - [2. Get the Docker images with `=nil;` toolchain](#2-get-the-docker-images-with-nil-toolchain)
+  - [2. Start a development environment with `=nil;` toolchain](#2-start-a-development-environment-with-nil-toolchain)
 - [Part 1. Circuit development workflow](#part-1-circuit-development-workflow)
   - [Step 1: Compile a circuit](#step-1-compile-a-circuit)
   - [Step 2: Build a circuit statement](#step-2-build-a-circuit-statement)
@@ -30,6 +30,11 @@ or Docker Desktop (on macOS).
   - [Step 2: Post a proof request](#step-2-post-a-proof-request)
   - [Step 3: Check if the proof is ready](#step-3-check-if-the-proof-is-ready)
   - [Step 4: Download the proof](#step-4-download-the-proof)
+- [Part 3: In-EVM proof verification](#part-3-in-evm-proof-verification)
+  - [Step 1. Build circuit parameters from a circuit](#step-1-build-circuit-parameters-from-a-circuit)
+  - [Step 2. Verify a proof locally with EVM Placeholder Verifier](#step-2-verify-a-proof-locally-with-evm-placeholder-verifier)
+  - [Step 3. Deploy gate arguments to a testnet](#step-3-deploy-gate-arguments-to-a-testnet)
+  - [Step 4. Verify a proof on a testnet](#step-4-verify-a-proof-on-a-testnet)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -60,9 +65,22 @@ If you cloned without `--recurse-submodules`, initialize submodules explicitly:
 git submodule update --init --recursive
 ```
 
-## 2. Get the Docker images with `=nil;` toolchain
+## 2. Start a development environment with `=nil;` toolchain
 
-In the tutorial, we will use Docker images with parts of the `=nil;` toolchain.
+In the tutorial, we will use an environment based on Docker and Docker Compose.
+To work with Docker conveniently, we'll run containers under the same users that
+you have on your machines.
+Start with the following commands:
+
+```bash
+scripts/run.sh init
+export user_id=$(id -u)
+export group_id=$(id -g)
+docker compose up --build --detach
+```
+
+Docker Compose will download images with parts of the `=nil;` toolchain
+and run them as Docker containers.
 We recommend using them because they're tested for compatibility,
 and they save you time on installing and compiling everything:
 
@@ -72,16 +90,12 @@ and they save you time on installing and compiling everything:
 * The `nilfoundation/proof-market-toolchain` image has all you need to make an account on 
 the `=nil;` Proof Market, put your circuit on it, and order a proof.
 
-Both images are versioned according to the products they contain.
-In the tutorial, we'll use the latest compatible versions of both images:
+* The `nilfoundation/evm-placeholder-verification` image allows you to run the 
+  EVM Placeholder Verifier locally to test on-chain proof verification.
 
-```bash
-ZKLLVM_VERSION=0.0.86
-docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
+These images are versioned according to the products they contain.
+In the tutorial, we'll use their latest compatible versions.
 
-TOOLCHAIN_VERSION=0.0.37
-docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
-```
 
 # Part 1. Circuit development workflow
 
@@ -97,6 +111,9 @@ Code in `./src` is using the
 [Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3).
 
 ## Step 1: Compile a circuit
+
+Before you start, make sure that you've initialized environment,
+as shown in the [Getting started](#getting-started) section.
 
 In `./src/main.cpp`, we have a function starting with `[[circuit]]`.
 This code definition is what we call the circuit itself.
@@ -437,3 +454,34 @@ ls -l /tmp/example.proof
 
 Now the proof can be verified, both off-chain and on-chain.
 These steps will be added soon.
+
+# Part 3: In-EVM proof verification
+
+In the last part, we'll use the circuit to produce so-called "circuit parameter" files.
+We will use them to verify proofs, made with this circuit, in-EVM:
+first, on a local development environment, and then on a testnet.
+
+## Step 1. Build circuit parameters from a circuit
+
+First, we will generate the files that represent the circuit in a form,
+that is executable in-EVM:
+
+```bash
+scripts/run.sh --docker build_constraint
+scripts/run.sh --docker build_circuit_params
+```
+
+## Step 2. Verify a proof locally with EVM Placeholder Verifier
+
+EVM Placeholder Verifier implements verification of proofs made with the 
+Placeholder proof system.
+For that, it uses the circuit parameter files that we generated before.
+Let's deploy it locally and verify a proof with it:
+
+```bash
+scripts/run.sh --docker verify
+```
+
+## Step 3. Deploy gate arguments to a testnet
+
+## Step 4. Verify a proof on a testnet

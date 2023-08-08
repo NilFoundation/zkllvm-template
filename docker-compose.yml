@@ -1,0 +1,56 @@
+version: '3.5'
+
+services:
+  zkllvm:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ghcr.io/nilfoundation/zkllvm-template:0.0.86
+        RUN groupadd $USER -g $group_id || true
+        RUN useradd $USER -u $user_id -g $group_id --create-home || true
+    image: zkllvm:latest
+    platform: linux/amd64
+    user: "${user_id}:${group_id}"
+    volumes:
+      - ./:/opt/zkllvm-template
+    command: bash -c "while true; do sleep 60; done"
+    tty: true
+
+  toolchain:
+    # Proof Market toolchain
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ghcr.io/nilfoundation/proof-market-toolchain:0.0.37
+        RUN groupadd $USER -g $group_id || true
+        RUN useradd $USER -u $user_id -g $group_id --create-home || true
+    image: toolchain:latest
+    platform: linux/amd64
+    user: "${user_id}:${group_id}"
+    volumes:
+      - ./:/opt/zkllvm-template
+      - ./.config:/.config/
+      - ./.config:/root/.config/
+      - ./.config:/home/$USER/.config/
+      - ./.config/.user:/proof-market-toolchain/scripts/.user
+      - ./.config/.secret:/proof-market-toolchain/scripts/.secret
+    command: bash -c "while true; do sleep 60; done"
+    tty: true
+
+  verifier:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ghcr.io/nilfoundation/evm-placeholder-verification:latest
+        RUN groupadd $USER -g $group_id || true
+        RUN useradd $USER -u $user_id -g $group_id --create-home || true
+
+    image: verifier:latest
+    platform: linux/amd64
+    user: "${user_id}:${group_id}"
+    volumes:
+      - ./:/opt/zkllvm-template
+      - ./circuit_params:/opt/evm-placeholder-verification/contracts/zkllvm/template
+    command: bash -c "while true; do sleep 60; done"
+    tty: true
+

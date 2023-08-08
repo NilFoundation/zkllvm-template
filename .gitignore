@@ -34,6 +34,7 @@
 .idea/
 
 build/
+circuit_params/
 cmake-build-debug/
 # configuration directory with Proof Market credentials
 .config
