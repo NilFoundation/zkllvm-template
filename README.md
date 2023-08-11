@@ -93,8 +93,9 @@ and then use it to build a proof for a particular input.
 Last thing, we'll post the statement on the Proof Market,
 so that zk application developers will be able to request proofs with this statement.
 
-Code in `./src` is using the
-[Crypto3 C++ cryptography suite](https://github.com/nilfoundation/crypto3).
+Code in `./src` implements the logic of a storage proof on Ethereum by validating Merkle Tree path of the commited data.
+It reuses algorithms and data structures from the the
+[Crypto3 C++ high efficiency cryptography library](https://github.com/nilfoundation/crypto3).
 
 ## Step 1: Compile a circuit
 
