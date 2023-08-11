@@ -68,3 +68,12 @@ Historical data for blocks produced before Capella update is located in 'histori
 The newer data is located in `historical_summaries`.
 More information about Beacon State structure can be found [here](https://eth2book.info/capella/part3/containers/state/). 
 
+# How to use it? 
+
+**To generate test data about account on Consensus Layer** 
+
+Run 
+```
+python3 mock_data.py --output <output file name>
+```
+
