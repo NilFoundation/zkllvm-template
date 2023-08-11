@@ -9,7 +9,7 @@ task("sendData",
 
         // circit params --> init params, coloms rot
 
-        const contract = '0x0000000000000000000000000000000000000000';
+        const contract = '0xf01A3a0eD039494dD2Ff409Fa398FB9dEe40D567';
         const circuit_params_filepath = './contracts/circuit_params.json';
         
         // ================== Data prep ==================
