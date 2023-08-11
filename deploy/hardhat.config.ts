@@ -3,6 +3,7 @@ require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-ethers");
 
 import './tasks/deploy'
+import './tasks/sendData'
 
 module.exports = {
     solidity: {
