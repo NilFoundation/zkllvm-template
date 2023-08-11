@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../../../contracts/types.sol";
+import "@nilfoundation/evm-placeholder-verification/contracts/types.sol";
 import "./gate_argument.sol";
 
 library template_gate0{
