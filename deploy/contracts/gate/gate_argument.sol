@@ -19,10 +19,10 @@
 //---------------------------------------------------------------------------//
 pragma solidity >=0.8.4;
 
-import "../../../contracts/types.sol";
-import "../../../contracts/basic_marshalling.sol";
-import "../../../contracts/commitments/batched_lpc_verifier.sol";
-import "../../../contracts/interfaces/gate_argument.sol";
+import "@nilfoundation/evm-placeholder-verification/contracts/types.sol";
+import "@nilfoundation/evm-placeholder-verification/contracts/basic_marshalling.sol";
+import "@nilfoundation/evm-placeholder-verification/contracts/commitments/batched_lpc_verifier.sol";
+import "@nilfoundation/evm-placeholder-verification/contracts/interfaces/gate_argument.sol";
 
 import "./gate0.sol";
 import "./gate15.sol";
