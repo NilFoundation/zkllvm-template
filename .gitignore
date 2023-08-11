@@ -43,3 +43,6 @@ deploy/artifacts
 deploy/cache
 deploy/node_modules
 deploy/typechain-types
+
+#python
+__pycache__/

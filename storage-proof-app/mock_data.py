@@ -28,3 +28,9 @@ if __name__ == "__main__":
     with open(args.output, 'w') as f:
         sys.stdout = f
         print(json.dumps(input, indent=4))
+
+    public_input = [{"root" : root.hex()}, {"leaf" : leaf.hex()}]
+    output_pi = "public_input_" + args.output
+    with open(output_pi, 'w') as f:
+        sys.stdout = f
+        print(json.dumps(public_input, indent=4))
