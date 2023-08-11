@@ -38,4 +38,8 @@ cmake-build-debug/
 # configuration directory with Proof Market credentials
 .config
 
-__pycache__/
+#hardhat files
+deploy/artifacts
+deploy/cache
+deploy/node_modules
+deploy/typechain-types
