@@ -43,7 +43,9 @@ contract StorageProofVerifier is IStorageProofVerifier {
     function verifyStorageProof(
         bytes calldata _blob, 
         uint256[] calldata _init_params,
-        int256[][] calldata _columns_rotations
+        int256[][] calldata _columns_rotations, 
+        bytes32 _root,
+        bytes32 _leaf
     ) external returns (bool result) {
 
         result = IVerifier(verifier).verify(_blob, _init_params, _columns_rotations, gate_argument);
