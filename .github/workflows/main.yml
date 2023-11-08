@@ -15,7 +15,7 @@ concurrency:
 
 env:
   ZKLLVM_VERSION: 0.1.1
-  TOOLCHAIN_VERSION: 0.0.37
+  TOOLCHAIN_VERSION: 0.0.38
 
 jobs:
   test-zkllvm-workflow:
