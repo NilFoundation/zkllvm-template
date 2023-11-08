@@ -76,7 +76,7 @@ Both images are versioned according to the products they contain.
 In the tutorial, we'll use the latest compatible versions of both images:
 
 ```bash
-ZKLLVM_VERSION=0.1.0
+ZKLLVM_VERSION=0.1.1
 docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
 
 TOOLCHAIN_VERSION=0.0.37
