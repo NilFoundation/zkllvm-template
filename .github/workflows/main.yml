@@ -14,8 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  ZKLLVM_VERSION: 0.1.5
-  TOOLCHAIN_VERSION: 0.0.39
+  TOOLCHAIN_VERSION: 0.1.6
 
 jobs:
   test-zkllvm-workflow:
@@ -29,5 +28,11 @@ jobs:
       - name: Compile a circuit
         run: scripts/run.sh --verbose --docker compile
 
-      - name: Build a statement for the Proof Market
-        run: scripts/run.sh --verbose --docker build_statement
+      - name: Make constraint and assignment table for EVM verifier endpoint
+        run: scripts/run.sh --verbose --docker build_constraint
+
+      - name: Calculate a proof
+        run: scripts/run.sh --verbose --docker prove
+
+      - name: Build circuit parameters for EVM verifier endpoint
+        run: scripts/run.sh --verbose --docker build_circuit_params
