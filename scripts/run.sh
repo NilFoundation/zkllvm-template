@@ -14,12 +14,12 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT="$SCRIPT_DIR/.."
 
 # Set image versions in the environment before running this script:
-# export ZKLLVM_VERSION=0.0.58
-# export TOOLCHAIN_VERSION=0.0.33
+# export ZKLLVM_VERSION=0.1.5
+# export TOOLCHAIN_VERSION=0.0.39
 
 # If unset, default values will be used:
-echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.0.86}"
-echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.37}"
+echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.1.5}"
+echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.39}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
