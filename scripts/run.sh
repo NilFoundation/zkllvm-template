@@ -14,12 +14,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT="$SCRIPT_DIR/.."
 
 # Set image versions in the environment before running this script:
-# export ZKLLVM_VERSION=0.1.5
-# export TOOLCHAIN_VERSION=0.0.39
+# export TOOLCHAIN_VERSION=0.1.6
 
 # If unset, default values will be used:
-echo "using nilfoundation/zkllvm-template:${ZKLLVM_VERSION:=0.1.5}"
-echo "using nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION:=0.0.39}"
+echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.6}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
@@ -52,7 +50,7 @@ run_zkllvm() {
         --name zkllvm \
         --volume $(pwd):/opt/zkllvm-template \
         --user $(id -u ${USER}):$(id -g ${USER}) \
-        ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
+        ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION}
 }
 
 run_proof_market_toolchain() {
@@ -70,11 +68,11 @@ run_proof_market_toolchain() {
         --volume $(pwd)/.config/.user:/proof-market-toolchain/scripts/.user \
         --volume $(pwd)/.config/.secret:/proof-market-toolchain/scripts/.secret \
         --user $(id -u ${USER}):$(id -g ${USER}) \
-      ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
+      ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION}
 }
 
 # Compile source code into a circuit
-# https://github.com/NilFoundation/zkllvm-template/#step-1-compile-a-circuit
+# https://github.com/nilfoundation/toolchain/#step-1-compile-a-circuit
 compile() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
@@ -83,7 +81,7 @@ compile() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
+          ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash ./scripts/run.sh compile"
         cd -
     else
@@ -108,7 +106,7 @@ build_constraint() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
+          ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash ./scripts/run.sh build_constraint"
         cd -
     else
@@ -133,7 +131,7 @@ build_circuit_params() {
           --platform=linux/amd64 \
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
-          ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION} \
+          ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash ./scripts/run.sh build_circuit_params"
         cd -
     else
@@ -163,7 +161,7 @@ build_circuit_params() {
 # Use the Proof Market toolchain to pack circuit into a statement
 # that can later be used to produce a proof locally or sent to the
 # Proof Market.
-# https://github.com/NilFoundation/zkllvm-template/#step-2-build-a-circuit-statement
+# https://github.com/nilfoundation/toolchain/#step-2-build-a-circuit-statement
 build_statement() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
@@ -175,7 +173,7 @@ build_statement() {
           --volume $(pwd)/.config:/.config/ \
           --volume $(pwd)/.config:/root/.config/ \
           --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
-          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}  \
+          ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION}  \
           sh -c "bash /opt/zkllvm-template/scripts/run.sh build_statement"
         cd -
     else
@@ -194,13 +192,13 @@ build_statement() {
 # Prove the circuit with particular input.
 # See the input files at:
 # ./src/main-input.json
-# https://github.com/NilFoundation/zkllvm-template/#step-3-produce-and-verify-a-proof-locally
+# https://github.com/nilfoundation/toolchain/#step-3-produce-and-verify-a-proof-locally
 prove() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
 
         mkdir -p $REPO_ROOT/build/template
-        # workaround for https://github.com/NilFoundation/proof-market-toolchain/issues/61
+        # workaround for https://github.com/nilfoundation/toolchain/issues/61
         mkdir -p .config
         touch .config/config.ini
         $DOCKER run $DOCKER_OPTS \
@@ -210,16 +208,16 @@ prove() {
           --volume $(pwd):/opt/zkllvm-template \
           --volume $(pwd)/.config:/.config/ \
           --volume $(pwd)/.config:/root/.config/ \
-          --volume $(pwd)/.config:/proof-market-toolchain/.config/ \
-          ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION} \
+          --volume $(pwd)/.config:/opt/nil-toolchain/.config/ \
+          ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION} \
           sh -c "bash /opt/zkllvm-template/scripts/run.sh prove"
         cd -
     else
         cd "$REPO_ROOT"
         proof-generator \
-            --circuit_input="$REPO_ROOT/build/template.json" \
-            --public_input="$REPO_ROOT/src/main-input.json" \
-            --proof_out="$REPO_ROOT/build/template/proof.bin"
+            --circuit="$REPO_ROOT/build/template.crct" \
+            --assignment-table="$REPO_ROOT/build/template.tbl" \
+            --proof="$REPO_ROOT/build/template/proof.bin"
         check_file_exists "$REPO_ROOT/build/template/proof.bin"
     fi
 }
@@ -243,11 +241,9 @@ verify() {
 
 run_all() {
     compile
-    build_statement
-    prove
     build_constraint
+    prove
     build_circuit_params
-    verify
 }
 
 USE_DOCKER=false
