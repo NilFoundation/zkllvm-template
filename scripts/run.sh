@@ -14,10 +14,10 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT="$SCRIPT_DIR/.."
 
 # Set image versions in the environment before running this script:
-# export TOOLCHAIN_VERSION=0.1.6
+# export TOOLCHAIN_VERSION=0.1.7
 
 # If unset, default values will be used:
-echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.6}"
+echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.7}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
