@@ -25,11 +25,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Compile a circuit
+      - name: Compile a circuit in IR format
         run: scripts/run.sh --verbose --docker compile
 
-      - name: Make constraint and assignment table for EVM verifier endpoint
-        run: scripts/run.sh --verbose --docker build_constraint
+      - name: Build a binary circuit and assignment table
+        run: scripts/run.sh --verbose --docker run_assigner
 
       - name: Calculate a proof
         run: scripts/run.sh --verbose --docker prove

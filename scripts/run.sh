@@ -13,10 +13,11 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT="$SCRIPT_DIR/.."
 
-# Set image versions in the environment before running this script:
-# export TOOLCHAIN_VERSION=0.1.7
-
-# If unset, default values will be used:
+# You can set image version as an environment variable before running this script:
+# export TOOLCHAIN_VERSION=<custom version here>
+# See all available versions at
+# https://github.com/orgs/NilFoundation/packages/container/package/toolchain
+# If unset, default value will be used:
 echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.7}"
 
 # podman is a safer option for using on CI machines
@@ -42,17 +43,20 @@ check_file_exists() {
     fi
 }
 
-run_zkllvm() {
+run_toolchain() {
     cd $REPO_ROOT
     # silently stop the existing container if it's running already
-    $DOCKER rm zkllvm 2>/dev/null || true
+    $DOCKER rm nil-tolchain 2>/dev/null || true
     $DOCKER run -it --rm \
-        --name zkllvm \
+        --name nil-tolchain \
         --volume $(pwd):/opt/zkllvm-template \
         --user $(id -u ${USER}):$(id -g ${USER}) \
         ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION}
 }
 
+
+# Deprecated.
+# Python scripts will be moved to the main image, nilfoundation/toolchain
 run_proof_market_toolchain() {
     cd $REPO_ROOT
     # create files for storing credentials, so that they would persist
@@ -95,10 +99,9 @@ compile() {
     fi
 }
 
-# Use assigner to produce a constraint file and an assignment table.
-# This is not a part of the basic development workflow,
-# but can be used for debugging circuits.
-build_constraint() {
+# Run assigner to produce a circuit file and an assignment table.
+# The proof-generator CLI uses these files to compute a proof.
+run_assigner() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -107,7 +110,7 @@ build_constraint() {
           --user $(id -u ${USER}):$(id -g ${USER}) \
           --volume $(pwd):/opt/zkllvm-template \
           ghcr.io/nilfoundation/toolchain:${TOOLCHAIN_VERSION} \
-          sh -c "bash ./scripts/run.sh build_constraint"
+          sh -c "bash ./scripts/run.sh run_assigner"
         cd -
     else
         cd "$REPO_ROOT/build"
@@ -123,6 +126,10 @@ build_constraint() {
     fi
   }
 
+
+# Build circuit parameter / gate argument files.
+# They should be deployed on-chain and provided as inputs to the
+# EVM Placeholder Verifier.
 build_circuit_params() {
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
@@ -146,7 +153,7 @@ build_circuit_params() {
         check_file_exists "$REPO_ROOT/build/template/gate_argument.sol"
         check_file_exists "$REPO_ROOT/build/template/linked_libs_list.json"
         check_file_exists "$REPO_ROOT/build/template/public_input.json"
-        # todo: replace with gen-circuit-paramsg
+
         transpiler \
           -m gen-circuit-params \
           -i ../src/main-input.json \
@@ -255,12 +262,13 @@ while [[ "$#" -gt 0 ]]; do
         -v|--verbose) set -x ;;
         all) SUBCOMMAND=run_all ;;
         compile) SUBCOMMAND=compile ;;
-        build_constraint) SUBCOMMAND=build_constraint ;;
+        run_assigner) SUBCOMMAND=run_assigner ;;
+        build_constraint) SUBCOMMAND=run_assigner ;; # keeping old command name for compatibilty
         build_circuit_params) SUBCOMMAND=build_circuit_params ;;
         build_statement) SUBCOMMAND=build_statement ;;
         prove) SUBCOMMAND=prove ;;
         verify) SUBCOMMAND=verify ;;
-        run_zkllvm) SUBCOMMAND=run_zkllvm ;;
+        run_toolchain) SUBCOMMAND=run_toolchain ;;
         run_proof_market_toolchain) SUBCOMMAND=run_proof_market_toolchain ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac

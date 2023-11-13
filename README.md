@@ -166,8 +166,108 @@ zkLLVM can also produce circuits in another LLVM's IR format, `.bc`, but we won'
 </details>
 
 As a result of this step, we get a byte-code file `./build/src/template.ll`.
-This is what we call a circuit itself.
 It's a binary file in the LLVM's intermediate representation format.
+
+## Step 2: Build a circuit file and an assignment table
+
+Next step is to make a compiled circuit and assignment table.
+
+```bash
+scripts/run.sh --docker run_assigner
+```
+
+On this step, we run the `assigner`, giving it the circuit in LLVM IR format (`template.lls`)
+and the input data (`./src/main-input.json`).
+The `assigner` produces the following files:
+
+* Circuit file `./build/template.crct` is the circuit in a binary format that is
+  usable by the `proof-generator`.
+* Assignment table `./build/template.tbl` is a representation of input data,
+  prepared for proof computation with this particular circuit.
+
+## Step 3: Produce and verify a proof locally
+
+Now we have everything ready to produce our first proof.
+As a circuit developer, we want to first build it locally, to check that our circuit is working.
+We'll use the `proof-generator` CLI, which is a part of the =nil; toolchain.
+
+```bash
+scripts/run.sh --docker prove
+```
+
+<details>
+  <summary><code>🧰 [manual mode]</code></summary>
+
+Run the `proof-generator` binary to generate a proof:
+
+```bash
+proof-generator \
+    --circuit_input=/opt/zkllvm-template/build/template.json \
+    --public_input=/opt/zkllvm-template/src/main-input.json \
+    --proof_out=/opt/zkllvm-template/build/template.proof
+    
+# --circuit_input: path to the circuit statement
+# --public_input: path to the file that contains particular input, that we want to make a proof for
+# --proof_out: path and name of the proof file
+```
+</details>
+
+Note the following lines in the build log:
+
+```
+Preprocessing public data...
+Preprocessing private data...
+Generating proof...
+Proof generated
+Proof is verified
+...
+```
+
+In the first lines, `proof-generator` creates a proof, and in the last one it verifies the proof.
+The resulting proof is in the file `./build/template.proof`.
+
+Congratulations!
+You've produced a non-interactive zero-knowledge proof, or, formally speaking, 
+a zero-knowledge succinct non-interactive argument of knowledge
+([zk-SNARK](https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof)).
+
+Now it's time to work with the `=nil;` Proof Market.
+
+## Step 4: Make an account on the Proof Market
+
+To publish statements and order proofs from the Proof Market, you need an account.
+We'll use the command line tools to create a new one.
+
+First, run a Docker container with the Proof Market toolchain:
+
+```bash
+cd /opt/zkllvm-template
+scripts/run.sh run_proof_market_toolchain
+```
+
+Great, now you're in the container's console.
+Time to make an account:
+
+```bash
+cd /proof-market-toolchain
+python3 scripts/signup.py user \
+    -u <username> \
+    -p <password> \
+    -e <email>
+```
+
+It should return something like this:
+
+```json
+{"user":"zkdev","active":true,"extra":{},"error":false,"code":201}
+```
+
+This command will save your username and password in two files in the container:
+* `/proof-market-toolchain/scripts/.user`
+* `/proof-market-toolchain/scripts/.secret`
+
+These files in the container are mounted to `.config/.user` and `.config/.secret` on your machine.
+This way, when you stop the container, the files will persist until you run it again.
 
 ## Step 2: Build a circuit statement
 
@@ -239,86 +339,6 @@ As a result, we have the circuit statement file `./build/template.json`.
 Later we will use it to generate a proof locally.
 We will also push this circuit statement to the Proof Market.
 
-## Step 3: Produce and verify a proof locally
-
-Now we have everything ready to produce our first proof.
-As a circuit developer, we want to first build it locally, to check that our circuit is working.
-We'll use the `proof-generator` CLI, which is a part of the Proof Market toolchain.
-
-```bash
-scripts/run.sh --docker prove
-```
-
-<details>
-  <summary><code>🧰 [manual mode]</code></summary>
-
-Continue in the `proof-market-toolchain` container that you made in step 2.
-Run the `proof-generator` binary to generate a proof:
-
-```bash
-proof-generator \
-    --circuit_input=/opt/zkllvm-template/build/template.json \
-    --public_input=/opt/zkllvm-template/src/main-input.json \
-    --proof_out=/opt/zkllvm-template/build/template.proof
-    
-# --circuit_input: path to the circuit statement
-# --public_input: path to the file that contains particular input, that we want to make a proof for
-# --proof_out: path and name of the proof file
-```
-</details>
-
-Note the following lines in the build log:
-
-```
-generatring zkllvm proof...
-Proof is verified
-```
-
-In the first line, `proof-generator` creates a proof, and in the second — verifies it.
-The resulting proof is in the file `./build/template.proof`.
-
-Congratulations!
-You've produced a non-interactive zero-knowledge proof, or, formally speaking, 
-a zero-knowledge succinct non-interactive argument of knowledge
-([zk-SNARK](https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof)).
-
-Now it's time to work with the `=nil;` Proof Market.
-
-## Step 4: Make an account on the Proof Market
-
-To publish statements and order proofs from the Proof Market, you need an account.
-We'll use the command line tools to create a new one.
-
-First, run a Docker container with the Proof Market toolchain:
-
-```bash
-cd /opt/zkllvm-template
-scripts/run.sh run_proof_market_toolchain
-```
-
-Great, now you're in the container's console.
-Time to make an account:
-
-```bash
-cd /proof-market-toolchain
-python3 scripts/signup.py user \
-    -u <username> \
-    -p <password> \
-    -e <email>
-```
-
-It should return something like this:
-
-```json
-{"user":"zkdev","active":true,"extra":{},"error":false,"code":201}
-```
-
-This command will save your username and password in two files in the container:
-* `/proof-market-toolchain/scripts/.user`
-* `/proof-market-toolchain/scripts/.secret`
-
-These files in the container are mounted to `.config/.user` and `.config/.secret` on your machine.
-This way, when you stop the container, the files will persist until you run it again.
 
 ## Step 5: Publish the circuit statement
 
