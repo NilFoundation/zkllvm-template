@@ -17,7 +17,7 @@ or Docker Desktop (on macOS).
 - [Introduction](#introduction)
 - [Getting started](#getting-started)
   - [1. Clone the template repository and submodules](#1-clone-the-template-repository-and-submodules)
-  - [2. Get the Docker images with `=nil;` toolchain](#2-get-the-docker-images-with-nil-toolchain)
+  - [2. Get the Docker image with `=nil;` toolchain](#2-get-the-docker-image-with-nil-toolchain)
 - [Part 1. Circuit development workflow](#part-1-circuit-development-workflow)
   - [Step 1: Compile a circuit](#step-1-compile-a-circuit)
   - [Step 2: Build a circuit file and an assignment table](#step-2-build-a-circuit-file-and-an-assignment-table)
@@ -61,28 +61,19 @@ If you cloned without `--recurse-submodules`, initialize submodules explicitly:
 git submodule update --init --recursive
 ```
 
-## 2. Get the Docker images with `=nil;` toolchain
+## 2. Get the Docker image with `=nil;` toolchain
 
-In the tutorial, we will use Docker images with parts of the `=nil;` toolchain.
-We recommend using them because they're tested for compatibility,
-and they save you time on installing and compiling everything:
-
-* The `nilfoundation/zkllvm-template` image has the zkLLVM part of the toolchain,
-  including the zkLLVM compiler (`clang`), `assigner`, and `tranpiler` binaries.
-
-* The `nilfoundation/proof-market-toolchain` image has all you need to make an account on 
-the `=nil;` Proof Market, put your circuit on it, and order a proof.
-
-Both images are versioned according to the products they contain.
-In the tutorial, we'll use the latest compatible versions of both images:
+In the tutorial, we will use a Docker image with `=nil;` toolchain:
 
 ```bash
-ZKLLVM_VERSION=0.1.5
-docker pull ghcr.io/nilfoundation/zkllvm-template:${ZKLLVM_VERSION}
-
-TOOLCHAIN_VERSION=0.0.39
-docker pull ghcr.io/nilfoundation/proof-market-toolchain:${TOOLCHAIN_VERSION}
+docker pull ghcr.io/nilfoundation/toolchain:latest
 ```
+
+We recommend using it because components of toolchain packed in one image are
+tested for compatibility, and it saves you time on installing and compiling everything.
+Images are tagged by versions of zkLLVM compiler.
+In most cases, you should just use the `latest` tag.
+For a full list of tags, see ghcr.io/nilfounation/toolchain.
 
 # Part 1. Circuit development workflow
 
