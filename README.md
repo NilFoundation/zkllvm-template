@@ -1,14 +1,17 @@
 
 [![Tutorial check](https://github.com/NilFoundation/zkllvm-template/actions/workflows/main.yml/badge.svg)](https://github.com/NilFoundation/zkllvm-template/actions/workflows/main.yml)
 
-# zkLLVM tutorial and template project
+# zkLLVM Tutorial and Template Project
 
-Tutorial and a template repository for a zk-enabled application project
-based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
+This repository serves as both a tutorial and a template project for creating an 
+application based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
 Use it to learn about developing zk-enabled apps with zkLLVM step-by-step.
 
-For this tutorial, you will need an amd64 machine with Docker or Podman (on Linux)
-or Docker Desktop (on macOS).
+##  Prerequisites
+
+For this tutorial, ensure you have an amd64 machine equipped with Docker or Podman (Linux) or Docker Desktop (macOS).
+For Windows users, Docker in WSL is recommended.
+While Docker Desktop may work on Windows, it is not officially supported in this tutorial.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -16,8 +19,8 @@ or Docker Desktop (on macOS).
 
 - [Introduction](#introduction)
 - [Getting started](#getting-started)
-  - [1. Clone the template repository and submodules](#1-clone-the-template-repository-and-submodules)
-  - [2. Get the Docker image with `=nil;` toolchain](#2-get-the-docker-image-with-nil-toolchain)
+  - [1. Repository setup](#1-repository-setup)
+  - [2. Using the image `ghcr.io/nilfoundation/toolchain`](#2-using-the-image-ghcrionilfoundationtoolchain)
 - [Part 1. Circuit development workflow](#part-1-circuit-development-workflow)
   - [Step 1: Compile a circuit](#step-1-compile-a-circuit)
   - [Step 2: Build a circuit file and an assignment table](#step-2-build-a-circuit-file-and-an-assignment-table)
@@ -36,44 +39,44 @@ or Docker Desktop (on macOS).
 
 # Introduction
 
-You will run each step of this tutorial as a command, conveniently wrapped in the `scripts/run.sh` script.
-We recommend using it when you go through the tutorial for the first time.
+This tutorial is structured into sequential steps, 
+each executed as a command within the `scripts/run.sh` script.
+For first-time users, we strongly recommend utilizing this script. 
 
-Once you've completed the tutorial, you can repeat it by running all commands manually in the console.
-Look at the `🧰 [manual mode]` instructions in collapsed blocks.
-They have all the steps with detailed explanations of commands and their parameters,
-file formats and other things.
+
+After completing the tutorial, you can revisit the steps by manually executing commands in the console.
+Detailed explanations of commands, parameters, file formats, and more can be found
+under the `🧰 [manual mode]` sections in the collapsed blocks.
 
 # Getting started
 
-## 1. Clone the template repository and submodules
+## 1. Repository setup
 
-First, clone this repository with all its submodules:
+Begin by cloning the repository and its submodules:
 
 ```bash
 git clone --recurse-submodules git@github.com:NilFoundation/zkllvm-template.git
 cd zkllvm-template
 ```
 
-If you cloned without `--recurse-submodules`, initialize submodules explicitly:
+If you initially cloned without `--recurse-submodules`, update submodules explicitly:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-## 2. Get the Docker image with `=nil;` toolchain
+## 2. Using the image `ghcr.io/nilfoundation/toolchain`
 
-In the tutorial, we will use a Docker image with `=nil;` toolchain:
+Throughout this tutorial, we'll utilize a Docker image containing the `=nil;` toolchain:
 
 ```bash
 docker pull ghcr.io/nilfoundation/toolchain:latest
 ```
 
-We recommend using it because components of toolchain packed in one image are
-tested for compatibility, and it saves you time on installing and compiling everything.
-Images are tagged by versions of zkLLVM compiler.
-In most cases, you should just use the `latest` tag.
-For a full list of tags, see ghcr.io/nilfounation/toolchain.
+We recommend this specific image as it integrates compatible toolchain components, streamlining the setup process.
+This image is tagged according to zkLLVM compiler versions, with `latest` tag always having the latest zkLLVM version.
+Typically, using the `latest` image is an optimal choice.
+For a list of available tags, visit ghcr.io/nilfounation/toolchain.
 
 # Part 1. Circuit development workflow
 
