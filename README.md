@@ -20,11 +20,12 @@ or Docker Desktop (on macOS).
   - [2. Get the Docker images with `=nil;` toolchain](#2-get-the-docker-images-with-nil-toolchain)
 - [Part 1. Circuit development workflow](#part-1-circuit-development-workflow)
   - [Step 1: Compile a circuit](#step-1-compile-a-circuit)
-  - [Step 2: Build a circuit statement](#step-2-build-a-circuit-statement)
+  - [Step 2: Build a circuit file and an assignment table](#step-2-build-a-circuit-file-and-an-assignment-table)
   - [Step 3: Produce and verify a proof locally](#step-3-produce-and-verify-a-proof-locally)
   - [Step 4: Make an account on the Proof Market](#step-4-make-an-account-on-the-proof-market)
-  - [Step 5: Publish the circuit statement](#step-5-publish-the-circuit-statement)
-  - [Step 6: Check the information about your statement](#step-6-check-the-information-about-your-statement)
+  - [Step 5: Build a circuit statement](#step-5-build-a-circuit-statement)
+  - [Step 6: Publish the circuit statement](#step-6-publish-the-circuit-statement)
+  - [Step 7: Check the information about your statement](#step-7-check-the-information-about-your-statement)
 - [Part 2. Application developer workflow](#part-2-application-developer-workflow)
   - [Step 1: See the statements available on the Proof Market](#step-1-see-the-statements-available-on-the-proof-market)
   - [Step 2: Post a proof request](#step-2-post-a-proof-request)
@@ -269,7 +270,7 @@ This command will save your username and password in two files in the container:
 These files in the container are mounted to `.config/.user` and `.config/.secret` on your machine.
 This way, when you stop the container, the files will persist until you run it again.
 
-## Step 2: Build a circuit statement
+## Step 5: Build a circuit statement
 
 The Proof Market works with circuits in the form of circuit statements.
 A statement is basically a JSON containing the circuit and various metadata
@@ -340,7 +341,7 @@ Later we will use it to generate a proof locally.
 We will also push this circuit statement to the Proof Market.
 
 
-## Step 5: Publish the circuit statement
+## Step 6: Publish the circuit statement
 
 Remember the statement that we've packed in step 2?
 Let's publish it on the Proof Market.
@@ -355,7 +356,7 @@ This command will return the following output with your statement's ID (key):
 Statement from /opt/zkllvm-template/build/template.json was pushed with key 12345678.
 ```
 
-## Step 6: Check the information about your statement
+## Step 7: Check the information about your statement
 
 Let's see how the statement is published:
 
