@@ -248,7 +248,7 @@ verify() {
 
 run_all() {
     compile
-    build_constraint
+    run_assigner
     prove
     build_circuit_params
 }
