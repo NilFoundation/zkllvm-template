@@ -18,7 +18,7 @@ REPO_ROOT="$SCRIPT_DIR/.."
 # See all available versions at
 # https://github.com/orgs/NilFoundation/packages/container/package/toolchain
 # If unset, default value will be used:
-echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.7}"
+echo "using nilfoundation/toolchain:${TOOLCHAIN_VERSION:=0.1.8}"
 
 # podman is a safer option for using on CI machines
 if ! command -v podman; then
