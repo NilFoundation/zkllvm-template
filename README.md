@@ -55,7 +55,7 @@ under the `🧰 [manual mode]` sections in the collapsed blocks.
 Begin by cloning the repository and its submodules:
 
 ```bash
-git clone --recurse-submodules git@github.com:NilFoundation/zkllvm-template.git
+git clone --recurse-submodules https://github.com/NilFoundation/zkllvm-template.git
 cd zkllvm-template
 ```
 
@@ -65,7 +65,7 @@ If you initially cloned without `--recurse-submodules`, update submodules explic
 git submodule update --init --recursive
 ```
 
-## 2. Using the image `ghcr.io/nilfoundation/toolchain`
+<!-- ## 2. Using the image `ghcr.io/nilfoundation/toolchain`
 
 Throughout this tutorial, we'll utilize a Docker image containing the `=nil;` toolchain:
 
@@ -76,9 +76,26 @@ docker pull ghcr.io/nilfoundation/toolchain:latest
 We recommend this specific image as it integrates compatible toolchain components, streamlining the setup process.
 This image is tagged according to zkLLVM compiler versions, with `latest` tag always having the latest zkLLVM version.
 Typically, using the `latest` image is an optimal choice.
-For a list of available tags, visit ghcr.io/nilfounation/toolchain.
+For a list of available tags, visit ghcr.io/nilfounation/toolchain. -->
 
-# Part 1. Circuit development workflow
+## 2. Toolchain installation
+
+zkLLVM is distributed as a deb package, so you can install it using the following commands (Ubuntu 20.04):
+
+```bash
+echo 'deb [trusted=yes]  http://deb.nil.foundation/ubuntu/ all main' >>/etc/apt/sources.list
+apt update
+apt install -y zkllvm proof-producer
+```
+
+The packages `cmake` and `libboost-all-dev` are required for building the template project:
+```bash
+apt install -y cmake libboost-all-dev
+```
+
+For the additional installation options, check [our docs](https://docs.nil.foundation/zkllvm/starting-first-project/installation).
+
+# Circuit development workflow
 
 In the first part of this tutorial, we'll walk through the development workflow
 of a circuit developer.
@@ -92,120 +109,71 @@ Code in `./src` implements the logic of a storage proof on Ethereum by validatin
 It reuses algorithms and data structures from the the
 [Crypto3 C++ high efficiency cryptography library](https://github.com/nilfoundation/crypto3).
 
-## Step 1: Compile a circuit
+## Step 0: Check the toolchain versions
+
+To check the versions of the tools that we will use, run the following commands:
+
+```bash
+assigner --version
+clang-zkllvm --version
+proof-generator-multi-threaded --version
+proof-generator-single-threaded --version
+```
+
+## Step 1: Configure the project and compile the circuit
 
 In `./src/main.cpp`, we have a function starting with `[[circuit]]`.
 This code definition is what we call the circuit itself.
 We will use zkLLVM compiler to make a byte-code representation of this circuit.
 
-Run the script from the root of your project.
+Run the commands from the root of your project.
 
+Configure the project with `cmake`:
 ```bash
-scripts/run.sh --docker compile
+cmake -G "Unix makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
 ```
 
-The `compile` command does the following:
-
-1. Starts a Docker container based on `nilfoundation/zkllvm-template`. 
-2. Makes a clean `./build` directory and initializes `cmake`.
-3. Compiles the code into a circuit.
-
-<details>
-  <summary><code>🧰 [manual mode]</code></summary>
-
-Start a Docker container with the zkLLVM toolchain:
-
+Compile the circuit:
 ```bash
-docker run --detach --rm \
-    --platform=linux/amd64 \
-    --volume $(pwd):/opt/zkllvm-template \
-    --user $(id -u ${USER}):$(id -g ${USER}) \
-    ghcr.io/nilfoundation/zkllvm-template:0.0.58
-```
-Note that it's a single command, wrapped on several lines.
-
-> The line `--volume $(pwd):/opt/zkllvm-template` mounts the project directory from  
-your host machine into the container, so that the source code is available in it.
-All the changes will persist on your machine,
-so you can stop this container at any time, start a new one, and continue.
-
-> The line `--user $(id -u ${USER}):$(id -g ${USER})` runs container with a user having
-the same user and group ID as your own user on the host machine.
-With this option, newly created files in the `./build` directory will
-belong to your user, and not to the `root`.
-
-Let's check that we have the zkLLVM compiler available in the container.
-Note that it replaces the original `clang`, being a fully compatible drop-in replacement:
-
-```console
-$ clang --version
-clang version 16.0.0 (https://github.com/NilFoundation/zkllvm-circifier.git bf352a2e14522504a0c832f2b66f73268c95e621)
-Target: x86_64-unknown-linux-gnu
-Thread model: posix
-InstalledDir: /usr/bin
+make -C ${ZKLLVM_BUILD:-build} template
 ```
 
-In the container, create a `./build` directory and compile the code:
-
-```bash
-cd /opt/zkllvm-template
-rm -rf build && mkdir build && cd build
-cmake -DCIRCUIT_ASSEMBLY_OUTPUT=TRUE ..
-make template
-```
-
-> The extra parameter `DCIRCUIT_ASSEMBLY_OUTPUT=TRUE` is required to produce circuits
-in `.ll` format, which is supported by proving tools.
-zkLLVM can also produce circuits in another LLVM's IR format, `.bc`, but we won't need it in this tutorial.
-
-</details>
-
-As a result of this step, we get a byte-code file `./build/src/template.ll`.
-It's a binary file in the LLVM's intermediate representation format.
+This will create a  `template.ll` file in the `build/src` directory. This file contains the compiled
+circuit intermediate representation.
 
 ## Step 2: Build a circuit file and an assignment table
 
 Next step is to make a compiled circuit and assignment table.
 
 ```bash
-scripts/run.sh --docker run_assigner
+assigner -b build/src/template.ll \
+         -i src/main-input.json \
+         --circuit template.crct \
+         --assignment-table template.tbl \
+         -e pallas
 ```
 
-On this step, we run the `assigner`, giving it the circuit in LLVM IR format (`template.lls`)
+On this step, we run the `assigner`, giving it the circuit in LLVM IR format (`template.ll`)
 and the input data (`./src/main-input.json`).
-The `assigner` produces the following files:
+The `assigner` produces two following files:
 
-* Circuit file `./build/template.crct` is the circuit in a binary format that is
+* Circuit file `template.crct` is the circuit in a binary format that is
   usable by the `proof-generator`.
-* Assignment table `./build/template.tbl` is a representation of input data,
+* Assignment table `template.tbl` is a representation of input data,
   prepared for proof computation with this particular circuit.
 
 ## Step 3: Produce and verify a proof locally
 
 Now we have everything ready to produce our first proof.
 As a circuit developer, we want to first build it locally, to check that our circuit is working.
-We'll use the `proof-generator` CLI, which is a part of the =nil; toolchain.
+We'll use the `proof-generator-single-threaded` CLI, which is a part of the =nil; toolchain.
 
 ```bash
-scripts/run.sh --docker prove
+proof-generator-single-threaded \
+    --circuit="template.crct" \
+    --assignment-table="template.tbl" \
+    --proof="proof.bin"
 ```
-
-<details>
-  <summary><code>🧰 [manual mode]</code></summary>
-
-Run the `proof-generator` binary to generate a proof:
-
-```bash
-proof-generator \
-    --circuit_input=/opt/zkllvm-template/build/template.json \
-    --public_input=/opt/zkllvm-template/src/main-input.json \
-    --proof_out=/opt/zkllvm-template/build/template.proof
-    
-# --circuit_input: path to the circuit statement
-# --public_input: path to the file that contains particular input, that we want to make a proof for
-# --proof_out: path and name of the proof file
-```
-</details>
 
 Note the following lines in the build log:
 
@@ -219,16 +187,16 @@ Proof is verified
 ```
 
 In the first lines, `proof-generator` creates a proof, and in the last one it verifies the proof.
-The resulting proof is in the file `./build/template.proof`.
+The resulting proof is in the file `./proof.bin`.
 
 Congratulations!
 You've produced a non-interactive zero-knowledge proof, or, formally speaking, 
 a zero-knowledge succinct non-interactive argument of knowledge
 ([zk-SNARK](https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof)).
 
-Now it's time to work with the `=nil;` Proof Market.
+<!-- Now it's time to work with the `=nil;` Proof Market. -->
 
-## Step 4: Make an account on the Proof Market
+<!-- ## Step 4: Make an account on the Proof Market
 
 To publish statements and order proofs from the Proof Market, you need an account.
 We'll use the command line tools to create a new one.
@@ -363,9 +331,9 @@ You should see all the details of your statement in response.
 
 Congratulations! You've built a zkLLVM circuit and published it on the Proof Market.
 Now it's time to have a look at how developers of zero-knowledge applications 
-use the Proof Market.
+use the Proof Market. -->
 
-# Part 2. Application developer workflow
+# Application developer workflow
 
 In this part, we will act as a developer of a zk application.
 Our task is to order a proof on the Proof Market:
