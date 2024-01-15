@@ -1,24 +1,22 @@
-#include <nil/crypto3/hash/algorithm/hash.hpp>
-#include <nil/crypto3/hash/sha2.hpp>
+#include <nil/crypto3/algebra/curves/pallas.hpp>
 
-using namespace nil::crypto3;
+using namespace nil::crypto3::algebra::curves;
+typename pallas::base_field_type::value_type pow(typename pallas::base_field_type::value_type a, int n) {
+    if (n == 0)
+        return 1;
 
-bool is_same(typename hashes::sha2<256>::block_type block0,
-    typename hashes::sha2<256>::block_type block1){
-
-    return block0[0] == block1[0] && block0[1] == block1[1];
+    typename pallas::base_field_type::value_type res = 1;
+    for (int i = 0; i < n; ++i) {
+        res *= a;
+    }
+    return res;
 }
 
-[[circuit]] bool
-    validate_path(std::array<typename hashes::sha2<256>::block_type, 0x05> merkle_path,
-        typename hashes::sha2<256>::block_type leave,
-        typename hashes::sha2<256>::block_type root) {
-    
-    typename hashes::sha2<256>::block_type subroot = leave;
+[[circuit]] typename pallas::base_field_type::value_type
+    field_arithmetic_example(typename pallas::base_field_type::value_type a,
+                             typename pallas::base_field_type::value_type b) {
 
-    for (int i = 0; i < 0x05; i++) {
-        subroot = hash<hashes::sha2<256>>(subroot, merkle_path[i]);
-    }
-
-    return is_same(subroot, root);
+    typename pallas::base_field_type::value_type c = (a + b) * a + b * (a + b) * (a + b);
+    const typename pallas::base_field_type::value_type constant = 0x12345678901234567890_cppui255;
+    return c * c * c / (b - a) + pow(a, 2) + constant;
 }
