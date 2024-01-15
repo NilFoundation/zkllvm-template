@@ -137,7 +137,7 @@ Run the commands from the root of your project.
 
 Configure the project with `cmake`:
 ```bash
-cmake -G "Unix makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
+cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
 ```
 
 Compile the circuit:
