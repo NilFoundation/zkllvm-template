@@ -116,7 +116,8 @@ run_assigner() {
         cd "$REPO_ROOT/build"
         assigner \
           -b src/template.ll \
-          -i ../src/main-input.json \
+          -i ../src/public-input.json \
+          -p ../src/private-input.json \
           -c template.crct \
           -t template.tbl \
           -e pallas
@@ -145,7 +146,7 @@ build_circuit_params() {
         cd "$REPO_ROOT/build"
         transpiler \
           -m gen-gate-argument \
-          -i ../src/main-input.json \
+          -i ../src/public-input.json \
           -t template.tbl \
           -c template.crct \
           -o template \
@@ -156,7 +157,7 @@ build_circuit_params() {
 
         transpiler \
           -m gen-circuit-params \
-          -i ../src/main-input.json \
+          -i ../src/public-input.json \
           -t template.tbl \
           -c template.crct \
           -o template
@@ -198,7 +199,7 @@ build_statement() {
 
 # Prove the circuit with particular input.
 # See the input files at:
-# ./src/main-input.json
+# ./src/public-input.json
 # https://github.com/nilfoundation/toolchain/#step-3-produce-and-verify-a-proof-locally
 prove() {
     if [ "$USE_DOCKER" = true ] ; then
