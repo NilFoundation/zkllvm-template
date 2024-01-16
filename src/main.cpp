@@ -14,9 +14,10 @@ typename pallas::base_field_type::value_type pow(typename pallas::base_field_typ
 
 [[circuit]] typename pallas::base_field_type::value_type
     field_arithmetic_example(typename pallas::base_field_type::value_type a,
+                             [[private_input]] typename pallas::base_field_type::value_type p,
                              typename pallas::base_field_type::value_type b) {
 
     typename pallas::base_field_type::value_type c = (a + b) * a + b * (a + b) * (a + b);
     const typename pallas::base_field_type::value_type constant = 0x12345678901234567890_cppui255;
-    return c * c * c / (b - a) + pow(a, 2) + constant;
+    return c * c * c / (b - a) + pow(a, 2) + constant + p;
 }

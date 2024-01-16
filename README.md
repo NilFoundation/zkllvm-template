@@ -3,7 +3,7 @@
 
 # zkLLVM Tutorial and Template Project
 
-This repository serves as both a tutorial and a template project for creating an 
+This repository serves as both a tutorial and a template project for creating an
 application based on the [zkLLVM toolchain](https://github.com/nilfoundation/zkllvm).
 Use it to learn about developing zk-enabled apps with zkLLVM step-by-step.
 
@@ -39,9 +39,9 @@ While Docker Desktop may work on Windows, it is not officially supported in this
 
 # Introduction
 
-This tutorial is structured into sequential steps, 
+This tutorial is structured into sequential steps,
 each executed as a command within the `scripts/run.sh` script.
-For first-time users, we strongly recommend utilizing this script. 
+For first-time users, we strongly recommend utilizing this script.
 
 
 After completing the tutorial, you can revisit the steps by manually executing commands in the console.
@@ -147,14 +147,15 @@ Next step is to make a compiled circuit and assignment table.
 
 ```bash
 assigner -b build/src/template.ll \
-         -i src/main-input.json \
+         -i src/public-input.json \
+         -p src/private-input.json \
          --circuit template.crct \
          --assignment-table template.tbl \
          -e pallas
 ```
 
 On this step, we run the `assigner`, giving it the circuit in LLVM IR format (`template.ll`)
-and the input data (`./src/main-input.json`).
+and the input data (`./src/public-input.json`).
 The `assigner` produces two following files:
 
 * Circuit file `template.crct` is the circuit in a binary format that is
@@ -190,7 +191,7 @@ In the first lines, `proof-generator` creates a proof, and in the last one it ve
 The resulting proof is in the file `./proof.bin`.
 
 Congratulations!
-You've produced a non-interactive zero-knowledge proof, or, formally speaking, 
+You've produced a non-interactive zero-knowledge proof, or, formally speaking,
 a zero-knowledge succinct non-interactive argument of knowledge
 ([zk-SNARK](https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof)).
 
@@ -287,7 +288,7 @@ python3 \
     --type placeholder-zkllvm \
     --private \
     --output /opt/zkllvm-template/build/template.json
-  
+
 # -c, --circuit: path to the circuit file
 # -n, --name: statement name
 # -o, --output: path to write the statement file
@@ -330,7 +331,7 @@ python3 scripts/statement_tools.py get \
 You should see all the details of your statement in response.
 
 Congratulations! You've built a zkLLVM circuit and published it on the Proof Market.
-Now it's time to have a look at how developers of zero-knowledge applications 
+Now it's time to have a look at how developers of zero-knowledge applications
 use the Proof Market. -->
 
 # Application developer workflow
@@ -362,7 +363,7 @@ python3 scripts/statement_tools.py get
 
 If you're on a live workshop by `=nil;`, use the statement with id `96079532`.
 It's built from the circuit code in this template, and accepts input from
-`./src/main-input.json`.
+`./src/public-input.json`.
 
 ## Step 2: Post a proof request
 
@@ -370,7 +371,7 @@ It's built from the circuit code in this template, and accepts input from
 python3 scripts/request_tools.py push \
     --key 96079532 \
     --cost 10 \
-    --file /opt/zkllvm-template/src/main-input.json
+    --file /opt/zkllvm-template/src/public-input.json
 ```
 
 The output will look like the following, but with different key values.
@@ -412,7 +413,7 @@ Limit request:	 {
 When the proof is ready, download it:
 
 ```bash
-python3 scripts/proof_tools.py get \ 
+python3 scripts/proof_tools.py get \
     --request_key 99887766 \
     --file /tmp/example.proof
 
