@@ -10,6 +10,8 @@ include(CircuitCompile)
 
 cm_workspace(crypto3)
 
+option(CI_RUN "Enable examples for CI run" FALSE)
+
 macro(cm_find_package NAME)
     if(NOT "${NAME}" MATCHES "^${CMAKE_WORKSPACE_NAME}_.*$" AND NOT "${NAME}" STREQUAL CM)
         find_package(${ARGV})

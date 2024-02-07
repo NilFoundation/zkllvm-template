@@ -50,28 +50,166 @@ jobs:
           assigner --version
           clang-zkllvm --version
 
+      - name: Clone zkllvm repository
+        run: git clone https://github.com/NilFoundation/zkLLVM.git
+
       - name: Configure CMake
         env:
           BOOST_ROOT: "${{ steps.install-boost.outputs.BOOST_ROOT }}"
-        run: cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
+        run: cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm -DCI_RUN=TRUE .
 
-      - name: Compile circuit
+      - name: Compile main.cpp circuit
         run: make -C ${ZKLLVM_BUILD:-build} template
 
-      - name: Build circuit file and assignment table
+      - name: Build main.cpp circuit file and assignment table
         run: assigner -b build/src/template.ll -i src/public-input.json -p src/private-input.json --circuit template.crct --assignment-table template.tbl -e pallas
 
-      - name: Generate proof
+      - name: Generate main.cpp proof
         run: proof-generator-single-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
 
-      # - name: Compile a circuit in IR format
-      #   run: scripts/run.sh --verbose --docker compile
+      - name: Generate main.cpp proof
+        run: proof-generator-single-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
 
-      # - name: Build a binary circuit and assignment table
-      #   run: scripts/run.sh --verbose --docker run_assigner
 
-      # - name: Calculate a proof
-      #   run: scripts/run.sh --verbose --docker prove
+      - name: Compile arithmetics example
+        run: make -C ${ZKLLVM_BUILD:-build} arithmetics_cpp_example
+      - name: Build arithmetics circuit file and assignment table
+        run: assigner -b build/src/arithmetics_cpp_example.ll -i zkLLVM/examples/inputs/arithmetics.inp --circuit arithmetics_cpp_example.crct --assignment-table arithmetics_cpp_example.tbl -e pallas
+      - name: Generate arithmetics proof
+        run: proof-generator-single-threaded --circuit="arithmetics_cpp_example.crct" --assignment-table="arithmetics_cpp_example.tbl" --proof="arithmetics_cpp_example.bin"
+
+      - name: Compile ed25519_field_add example
+        run: make -C ${ZKLLVM_BUILD:-build} ed25519_field_add
+      - name: Build ed25519_field_add circuit file and assignment table
+        run: assigner -b build/src/ed25519_field_add.ll -i zkLLVM/examples/inputs/ed25519_field_add.inp --circuit ed25519_field_add.crct --assignment-table ed25519_field_add.tbl -e pallas
+      - name: Generate ed25519_field_add proof
+        run: proof-generator-single-threaded --circuit="ed25519_field_add.crct" --assignment-table="ed25519_field_add.tbl" --proof="ed25519_field_add.bin"
+
+      - name: Compile ed25519_curve_add example
+        run: make -C ${ZKLLVM_BUILD:-build} ed25519_curve_add
+      - name: Build ed25519_curve_add circuit file and assignment table
+        run: assigner -b build/src/ed25519_curve_add.ll -i zkLLVM/examples/inputs/ed25519_curve_add.inp --circuit ed25519_curve_add.crct --assignment-table ed25519_curve_add.tbl -e pallas
+      - name: Generate ed25519_curve_add proof
+        run: proof-generator-single-threaded --circuit="ed25519_curve_add.crct" --assignment-table="ed25519_curve_add.tbl" --proof="ed25519_curve_add.bin"
+
+      - name: Compile sha2_256 example
+        run: make -C ${ZKLLVM_BUILD:-build} sha2_256
+      - name: Build sha2_256 circuit file and assignment table
+        run: assigner -b build/src/sha2_256.ll -i zkLLVM/examples/inputs/sha2_256.inp --circuit sha2_256.crct --assignment-table sha2_256.tbl -e pallas
+      # - name: Generate sha2_256 proof
+      #   run: proof-generator-single-threaded --circuit="sha2_256.crct" --assignment-table="sha2_256.tbl" --proof="sha2_256.bin"
+
+      - name: Compile merkle_poseidon_1prover example
+        run: make -C ${ZKLLVM_BUILD:-build} merkle_poseidon_1prover
+      - name: Build merkle_poseidon_1prover circuit file and assignment table
+        run: assigner -b build/src/merkle_poseidon_1prover.ll -i zkLLVM/examples/inputs/merkle_poseidon_1prover_public.inp -p zkLLVM/examples/inputs/merkle_poseidon_1prover_private.inp --circuit merkle_poseidon_1prover.crct --assignment-table merkle_poseidon_1prover.tbl -e pallas
+      - name: Generate merkle_poseidon_1prover proof
+        run: proof-generator-single-threaded --circuit="merkle_poseidon_1prover.crct" --assignment-table="merkle_poseidon_1prover.tbl" --proof="merkle_poseidon_1prover.bin"
+
+      - name: Compile private_input_array example
+        run: make -C ${ZKLLVM_BUILD:-build} private_input_array
+      - name: Build private_input_array circuit file and assignment table
+        run: assigner -b build/src/private_input_array.ll -i zkLLVM/examples/inputs/private_input_array_public.inp -p zkLLVM/examples/inputs/private_input_array_private.inp --circuit private_input_array.crct --assignment-table private_input_array.tbl -e pallas
+      - name: Generate private_input_array proof
+        run: proof-generator-single-threaded --circuit="private_input_array.crct" --assignment-table="private_input_array.tbl" --proof="private_input_array.bin"
+
+      - name: Compile poseidon example
+        run: make -C ${ZKLLVM_BUILD:-build} poseidon
+      - name: Build poseidon circuit file and assignment table
+        run: assigner -b build/src/poseidon.ll -i zkLLVM/examples/inputs/poseidon.inp --circuit poseidon.crct --assignment-table poseidon.tbl -e pallas
+      - name: Generate poseidon proof
+        run: proof-generator-single-threaded --circuit="poseidon.crct" --assignment-table="poseidon.tbl" --proof="poseidon.bin"
+
+      - name: Compile placeholder_verifier example
+        run: make -C ${ZKLLVM_BUILD:-build} placeholder_verifier
+      - name: Build placeholder_verifier circuit file and assignment table
+        run: assigner -b build/src/placeholder_verifier.ll -i zkLLVM/examples/inputs/placeholder_verifier.inp --circuit placeholder_verifier.crct --assignment-table placeholder_verifier.tbl -e pallas
+      # - name: Generate placeholder_verifier proof
+      #   run: proof-generator-single-threaded --circuit="placeholder_verifier.crct" --assignment-table="placeholder_verifier.tbl" --proof="placeholder_verifier.bin"
+
+      - name: Compile bit_operations_shift_right example
+        run: make -C ${ZKLLVM_BUILD:-build} bit_operations_shift_right
+      - name: Build bit_operations_shift_right circuit file and assignment table
+        run: assigner -b build/src/bit_operations_shift_right.ll -i zkLLVM/examples/inputs/bit_operations/shift_right.inp --circuit bit_operations_shift_right.crct --assignment-table bit_operations_shift_right.tbl -e pallas
+      - name: Generate bit_operations_shift_right proof
+        run: proof-generator-single-threaded --circuit="bit_operations_shift_right.crct" --assignment-table="bit_operations_shift_right.tbl" --proof="bit_operations_shift_right.bin"
+
+      - name: Compile bit_operations_bit_decomposition example
+        run: make -C ${ZKLLVM_BUILD:-build} bit_operations_bit_decomposition
+      - name: Build bit_operations_bit_decomposition circuit file and assignment table
+        run: assigner -b build/src/bit_operations_bit_decomposition.ll -i zkLLVM/examples/inputs/bit_operations/bit_decomposition.inp --circuit bit_operations_bit_decomposition.crct --assignment-table bit_operations_bit_decomposition.tbl -e pallas
+      - name: Generate bit_operations_bit_decomposition proof
+        run: proof-generator-single-threaded --circuit="bit_operations_bit_decomposition.crct" --assignment-table="bit_operations_bit_decomposition.tbl" --proof="bit_operations_bit_decomposition.bin"
+
+      - name: Compile bit_operations_uint_division example
+        run: make -C ${ZKLLVM_BUILD:-build} bit_operations_uint_division
+      - name: Build bit_operations_uint_division circuit file and assignment table
+        run: assigner -b build/src/bit_operations_uint_division.ll -i zkLLVM/examples/inputs/bit_operations/uint_division.inp --circuit bit_operations_uint_division.crct --assignment-table bit_operations_uint_division.tbl -e pallas
+      - name: Generate bit_operations_uint_division proof
+        run: proof-generator-single-threaded --circuit="bit_operations_uint_division.crct" --assignment-table="bit_operations_uint_division.tbl" --proof="bit_operations_uint_division.bin"
+
+      - name: Compile bit_operations_uint_remainder example
+        run: make -C ${ZKLLVM_BUILD:-build} bit_operations_uint_remainder
+      - name: Build bit_operations_uint_remainder circuit file and assignment table
+        run: assigner -b build/src/bit_operations_uint_remainder.ll -i zkLLVM/examples/inputs/bit_operations/uint_remainder.inp --circuit bit_operations_uint_remainder.crct --assignment-table bit_operations_uint_remainder.tbl -e pallas
+      - name: Generate bit_operations_uint_remainder proof
+        run: proof-generator-single-threaded --circuit="bit_operations_uint_remainder.crct" --assignment-table="bit_operations_uint_remainder.tbl" --proof="bit_operations_uint_remainder.bin"
+
+      - name: Compile compare_lequal example
+        run: make -C ${ZKLLVM_BUILD:-build} compare_lequal
+      - name: Build compare_lequal circuit file and assignment table
+        run: assigner -b build/src/compare_lequal.ll -i zkLLVM/examples/inputs/compare/lequal.inp --circuit compare_lequal.crct --assignment-table compare_lequal.tbl -e pallas
+      # - name: Generate compare_lequal proof
+      #   run: proof-generator-single-threaded --circuit="compare_lequal.crct" --assignment-table="compare_lequal.tbl" --proof="compare_lequal.bin"
+
+      - name: Compile compare_neq example
+        run: make -C ${ZKLLVM_BUILD:-build} compare_neq
+      - name: Build compare_neq circuit file and assignment table
+        run: assigner -b build/src/compare_neq.ll -i zkLLVM/examples/inputs/compare/neq.inp --circuit compare_neq.crct --assignment-table compare_neq.tbl -e pallas
+      - name: Generate compare_neq proof
+        run: proof-generator-single-threaded --circuit="compare_neq.crct" --assignment-table="compare_neq.tbl" --proof="compare_neq.bin"
+
+      - name: Compile compare_eq example
+        run: make -C ${ZKLLVM_BUILD:-build} compare_eq
+      - name: Build compare_eq circuit file and assignment table
+        run: assigner -b build/src/compare_eq.ll -i zkLLVM/examples/inputs/compare/eq.inp --circuit compare_eq.crct --assignment-table compare_eq.tbl -e pallas
+      - name: Generate compare_eq proof
+        run: proof-generator-single-threaded --circuit="compare_eq.crct" --assignment-table="compare_eq.tbl" --proof="compare_eq.bin"
+
+      - name: Compile validate_merkle_path_sha2_256 example
+        run: make -C ${ZKLLVM_BUILD:-build} validate_merkle_path_sha2_256
+      - name: Build validate_merkle_path_sha2_256 circuit file and assignment table
+        run: assigner -b build/src/validate_merkle_path_sha2_256.ll -i zkLLVM/examples/inputs/validate_merkle_path_sha2_256.inp --circuit validate_merkle_path_sha2_256.crct --assignment-table validate_merkle_path_sha2_256.tbl -e pallas
+      # - name: Generate validate_merkle_path_sha2_256 proof
+      #   run: proof-generator-single-threaded --circuit="validate_merkle_path_sha2_256.crct" --assignment-table="validate_merkle_path_sha2_256.tbl" --proof="validate_merkle_path_sha2_256.bin"
+
+      - name: Compile eddsa_signature_verification example
+        run: make -C ${ZKLLVM_BUILD:-build} eddsa_signature_verification
+      - name: Build eddsa_signature_verification circuit file and assignment table
+        run: assigner -b build/src/eddsa_signature_verification.ll -i zkLLVM/examples/inputs/eddsa_signature_verification.inp --circuit eddsa_signature_verification.crct --assignment-table eddsa_signature_verification.tbl -e pallas
+      # - name: Generate eddsa_signature_verification proof
+      #   run: proof-generator-single-threaded --circuit="eddsa_signature_verification.crct" --assignment-table="eddsa_signature_verification.tbl" --proof="eddsa_signature_verification.bin"
+
+      - name: Compile balances_tree example
+        run: make -C ${ZKLLVM_BUILD:-build} balances_tree
+      - name: Build balances_tree circuit file and assignment table
+        run: assigner -b build/src/balances_tree.ll -i zkLLVM/examples/inputs/balances_tree_public.inp -p zkLLVM/examples/inputs/balances_tree_private.inp --circuit balances_tree.crct --assignment-table balances_tree.tbl -e pallas
+      # - name: Generate balances_tree proof
+      #   run: proof-generator-single-threaded --circuit="balances_tree.crct" --assignment-table="balances_tree.tbl" --proof="balances_tree.bin"
+
+      - name: Compile sha2_512 example
+        run: make -C ${ZKLLVM_BUILD:-build} sha2_512
+      - name: Build sha2_512 circuit file and assignment table
+        run: assigner -b build/src/sha2_512.ll -i zkLLVM/examples/inputs/sha2_512.inp --circuit sha2_512.crct --assignment-table sha2_512.tbl -e pallas
+      # - name: Generate sha2_512 proof
+      #   run: proof-generator-single-threaded --circuit="sha2_512.crct" --assignment-table="sha2_512.tbl" --proof="sha2_512.bin"
+
+      - name: Compile pallas_curve_examples_pallas_curve_add example
+        run: make -C ${ZKLLVM_BUILD:-build} pallas_curve_examples_pallas_curve_add
+      - name: Build pallas_curve_examples_pallas_curve_add circuit file and assignment table
+        run: assigner -b build/src/pallas_curve_examples_pallas_curve_add.ll -i zkLLVM/examples/inputs/pallas_curve_examples/pallas_curve_add.inp --circuit pallas_curve_examples_pallas_curve_add.crct --assignment-table pallas_curve_examples_pallas_curve_add.tbl -e pallas
+      - name: Generate pallas_curve_examples_pallas_curve_add proof
+        run: proof-generator-single-threaded --circuit="pallas_curve_examples_pallas_curve_add.crct" --assignment-table="pallas_curve_examples_pallas_curve_add.tbl" --proof="pallas_curve_examples_pallas_curve_add.bin"
 
       # - name: Build circuit parameters for EVM verifier endpoint
       #   run: scripts/run.sh --verbose --docker build_circuit_params
