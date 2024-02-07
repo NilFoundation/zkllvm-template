@@ -15,6 +15,8 @@ concurrency:
 
 env:
   TOOLCHAIN_VERSION: 0.1.8
+  CONTAINER_TMP: /opt/
+  BOOST_VERSION: "1.80.0"
 
 jobs:
   test-zkllvm-workflow:
@@ -25,14 +27,51 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Compile a circuit in IR format
-        run: scripts/run.sh --verbose --docker compile
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.1
+        id: install-boost
+        with:
+            # A list of supported versions can be found here:
+            # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+            boost_version: ${{ env.BOOST_VERSION }}
+            boost_install_dir: ${{ env.CONTAINER_TMP }}
+            platform_version: 22.04
+            toolset: gcc
+            arch: x86
 
-      - name: Build a binary circuit and assignment table
-        run: scripts/run.sh --verbose --docker run_assigner
+      - name: Install deb packages
+        run: |
+          echo 'deb [trusted=yes] http://deb.nil.foundation/ubuntu/ all main' | sudo tee -a /etc/apt/sources.list > /dev/null
+          sudo apt update
+          sudo apt install -y zkllvm proof-producer
 
-      - name: Calculate a proof
-        run: scripts/run.sh --verbose --docker prove
+      - name: Print versions
+        run: |
+          assigner --version
+          clang-zkllvm --version
 
-      - name: Build circuit parameters for EVM verifier endpoint
-        run: scripts/run.sh --verbose --docker build_circuit_params
+      - name: Configure CMake
+        env:
+          BOOST_ROOT: "${{ steps.install-boost.outputs.BOOST_ROOT }}"
+        run: cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
+
+      - name: Compile circuit
+        run: make -C ${ZKLLVM_BUILD:-build} template
+
+      - name: Build circuit file and assignment table
+        run: assigner -b build/src/template.ll -i src/public-input.json -p src/private-input.json --circuit template.crct --assignment-table template.tbl -e pallas
+
+      - name: Generate proof
+        run: proof-generator-single-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
+
+      # - name: Compile a circuit in IR format
+      #   run: scripts/run.sh --verbose --docker compile
+
+      # - name: Build a binary circuit and assignment table
+      #   run: scripts/run.sh --verbose --docker run_assigner
+
+      # - name: Calculate a proof
+      #   run: scripts/run.sh --verbose --docker prove
+
+      # - name: Build circuit parameters for EVM verifier endpoint
+      #   run: scripts/run.sh --verbose --docker build_circuit_params
