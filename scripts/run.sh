@@ -78,6 +78,8 @@ run_proof_market_toolchain() {
 # Compile source code into a circuit
 # https://github.com/nilfoundation/toolchain/#step-1-compile-a-circuit
 compile() {
+    echo;
+    echo CMake configuration and compilation into IR:
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -102,6 +104,8 @@ compile() {
 # Run assigner to produce a circuit file and an assignment table.
 # The proof-generator CLI uses these files to compute a proof.
 run_assigner() {
+    echo;
+    echo Assigner run:
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -113,17 +117,17 @@ run_assigner() {
           sh -c "bash ./scripts/run.sh run_assigner"
         cd -
     else
-        cd "$REPO_ROOT/build"
+        cd "$REPO_ROOT"
         assigner \
-          -b src/template.ll \
-          -i ../src/public-input.json \
-          -p ../src/private-input.json \
+          -b build/src/template.ll \
+          -i src/public-input.json \
+          -p src/private-input.json \
           -c template.crct \
           -t template.tbl \
           -e pallas
         cd -
-        check_file_exists "$REPO_ROOT/build/template.crct"
-        check_file_exists "$REPO_ROOT/build/template.tbl"
+        check_file_exists "$REPO_ROOT/template.crct"
+        check_file_exists "$REPO_ROOT/template.tbl"
     fi
   }
 
@@ -132,6 +136,8 @@ run_assigner() {
 # They should be deployed on-chain and provided as inputs to the
 # EVM Placeholder Verifier.
 build_circuit_params() {
+    echo;
+    echo Building circuit params:
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -171,6 +177,8 @@ build_circuit_params() {
 # Proof Market.
 # https://github.com/nilfoundation/toolchain/#step-2-build-a-circuit-statement
 build_statement() {
+    echo;
+    echo Building statement:
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
         $DOCKER run $DOCKER_OPTS \
@@ -202,6 +210,9 @@ build_statement() {
 # ./src/public-input.json
 # https://github.com/nilfoundation/toolchain/#step-3-produce-and-verify-a-proof-locally
 prove() {
+    echo;
+    echo Proving:
+
     if [ "$USE_DOCKER" = true ] ; then
         cd "$REPO_ROOT"
 
@@ -222,15 +233,18 @@ prove() {
         cd -
     else
         cd "$REPO_ROOT"
-        proof-generator \
-            --circuit="$REPO_ROOT/build/template.crct" \
-            --assignment-table="$REPO_ROOT/build/template.tbl" \
-            --proof="$REPO_ROOT/build/template/proof.bin"
-        check_file_exists "$REPO_ROOT/build/template/proof.bin"
+        proof-generator-single-threaded \
+            --circuit="$REPO_ROOT/template.crct" \
+            --assignment-table="$REPO_ROOT/template.tbl" \
+            --proof="$REPO_ROOT/proof.bin"
+        check_file_exists "$REPO_ROOT/proof.bin"
     fi
 }
 
 verify() {
+    echo;
+    echo Verification:
+
   if [ "$USE_DOCKER" = true ] ; then
       cd "$REPO_ROOT"
       $DOCKER run $DOCKER_OPTS \
@@ -251,7 +265,7 @@ run_all() {
     compile
     run_assigner
     prove
-    build_circuit_params
+    # build_circuit_params
 }
 
 USE_DOCKER=false
