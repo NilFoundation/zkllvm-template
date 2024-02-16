@@ -91,11 +91,9 @@ compile() {
           sh -c "bash ./scripts/run.sh compile"
         cd -
     else
-        rm -rf "$REPO_ROOT/build"
-        mkdir -p "$REPO_ROOT/build"
-        cd "$REPO_ROOT/build"
-        cmake -DCIRCUIT_ASSEMBLY_OUTPUT=TRUE ..
-        VERBOSE=1 make template
+        cd "$REPO_ROOT"
+        cmake cmake -G "Unix Makefiles" -B ${ZKLLVM_BUILD:-build} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang-zkllvm .
+        VERBOSE=1 make -C ${ZKLLVM_BUILD:-build} template
         cd -
         check_file_exists "$REPO_ROOT/build/src/template.ll"
     fi

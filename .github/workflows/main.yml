@@ -49,6 +49,8 @@ jobs:
         run: |
           assigner --version
           clang-zkllvm --version
+          proof-generator-multi-threaded --version
+          proof-generator-single-threaded --version
 
       - name: Clone zkllvm repository
         run: git clone https://github.com/NilFoundation/zkLLVM.git
@@ -67,9 +69,14 @@ jobs:
       - name: Generate main.cpp proof
         run: proof-generator-single-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
 
-      - name: Generate main.cpp proof
+      - name: Generate main.cpp proof single-threaded
         run: proof-generator-single-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
 
+      - name: Generate main.cpp proof multi-threaded
+        run: proof-generator-multi-threaded --circuit="template.crct" --assignment-table="template.tbl" --proof="proof.bin"
+
+      - name: Run run.sh
+        run: bash scripts/run.sh
 
       - name: Compile arithmetics example
         run: make -C ${ZKLLVM_BUILD:-build} arithmetics_cpp_example
