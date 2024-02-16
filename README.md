@@ -120,6 +120,13 @@ proof-generator-multi-threaded --version
 proof-generator-single-threaded --version
 ```
 
+## Steps 1-3: Let script perform steps 1-3
+
+```bash
+bash scripts/run.sh
+```
+or run them manually:
+
 ## Step 1: Configure the project and compile the circuit
 
 In `./src/main.cpp`, we have a function starting with `[[circuit]]`.
